@@ -25,9 +25,20 @@
 .map-panel .panelhead{padding-bottom:10px}
 @media(max-width:900px){.quest-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.quest-grid{grid-template-columns:1fr}.quest-head{align-items:stretch}.nodes .node{height:31px;font-size:8px}.quest-card small{min-height:0}.shard-count{flex:1}}
+
+.golden-timer{display:block!important;color:var(--gold)!important;font-size:9px!important;letter-spacing:0!important;text-transform:none!important;white-space:normal}
+.potion-choices{display:grid;gap:9px;margin-top:14px}
+.wander-status{font-size:11px;color:var(--muted);line-height:1.5;border:1px dashed #475e7b;border-radius:10px;padding:11px;margin-bottom:10px}
+.wander-item{border:1px solid #536a89;background:linear-gradient(145deg,#263c5a,#17283f);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wander-item .itemtop strong{font-size:11px}
+.wander-item small{font-size:10px;color:var(--muted);line-height:1.4;flex:1}
+.wander-special{border:1px solid #7d6b43;background:linear-gradient(145deg,#3c3427,#202c3f);border-radius:11px;padding:10px;margin-top:9px}
+.wander-special b{font-size:11px}
+.wander-special small{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin:4px 0 8px}
+.wander-special .buy{width:100%}
 </style></head><body><div class="wrap">
 <header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>MEANING QUEST</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><button class="button ghost" id="restart">↻ New run</button></header>
-<section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small>HEARTS</small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
+<section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
 <section class="panel quest-board">
 <div class="panelhead quest-head"><div><h2>📜 Quest Bar</h2><div class="muted">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button></div></div>
 <div class="quest-grid" id="questCards"></div>
@@ -40,9 +51,9 @@
 </main><aside class="col sidecol">
 <section class="panel"><div class="panelhead"><div><h3>💎 Special relic powers</h3><div class="muted">Only three exist.</div></div></div><div class="sidepad"><div class="reliclist" id="relics"></div></div></section>
 <section class="panel"><div class="panelhead"><div><h3>🧳 Inventory</h3><div class="muted">Loot collected on this run.</div></div></div><div class="sidepad"><div class="inv" id="inventory"><span>Empty so far</span></div><div class="muted" style="margin-top:9px" id="trophies">Boss trophies: 0</div></div></section>
-<section class="panel"><div class="panelhead"><div><h3>🧙 The Trader</h3><div class="muted">A regular trader with useful supplies and fair prices.</div></div><span class="badge">🟢 ALWAYS HERE</span></div><div class="sidepad" id="shopArea"></div></section>
+<section class="panel"><div class="panelhead"><div><h3>🧙 The Trader</h3><div class="muted">A regular trader with useful supplies and fair prices.</div></div><span class="badge">🟢 ALWAYS HERE</span></div><div class="sidepad" id="shopArea"></div></section><section class="panel"><div class="panelhead"><div><h3>🧳 Wandering Trader</h3><div class="muted">Rare enchanted stock. May appear at a new level.</div></div><span class="badge" id="wanderingBadge">TRAVELLING</span></div><div class="sidepad" id="wanderingArea"></div></section>
 </aside></div><div class="footer">Learn at your own pace. Every correct answer brings you one step closer to the final challenge. <br>Meaning Quest • a personal learning adventure</div></div>
-<div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="modalRestart">Play again</button></div></div>
+<div class="modal" id="potionChoiceModal"><div class="modalcard"><div class="big">🧪</div><h2>Powerful Potion</h2><p>Choose ONE effect for this run. This choice cannot be undone.</p><div class="potion-choices"><button class="button gold" id="potionHearts">💛 +5 permanent hearts</button><button class="button ghost" id="potionSkip">⏩ Complete 5 levels at once</button></div></div></div><div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="modalRestart">Play again</button></div></div>
 <script>
 (function(){
 'use strict';
