@@ -29,7 +29,7 @@ const ITEMS=[
 {id:'luck',icon:'🍀',name:'Lucky Charm',cost:35,desc:'Your next correct answer earns bonus coins.',buy:function(){state.lucky++;return 'Lucky Charm ready.'}},
 {id:'elixir',icon:'⚗️',name:'XP Elixir',cost:40,desc:'Doubles XP for your next correct answer.',buy:function(){state.elixir++;return 'XP Elixir ready.'}},
 {id:'bomb',icon:'💣',name:'Boss Bomb',cost:55,desc:'Deals 1 damage to the current boss.',buy:function(){if(state.level%5!==0)return 'Save it for a boss level.';state.bossHp=Math.max(0,state.bossHp-1);if(state.bossHp===0)advanceLevel(true);return 'The boss took 1 damage!';}},
-{id:'streakguard',icon:'🧿',name:'Cold Flame',cost:25,desc:'Protects your streak from the next mistake.',buy:function(){state.streakGuard++;return 'Cold Flame activated! Your streak is protected.'}},
+{id:'streakguard',icon:'🔥',name:'Cold Flame',cost:25,desc:'Protects your streak from the next mistake.',buy:function(){state.streakGuard++;return 'Cold Flame activated! Your streak is protected.'}},
 {id:'magnet',icon:'🧲',name:'Treasure Magnet',cost:30,desc:'Collect 30 extra coins immediately.',buy:function(){state.coins+=30;return '30 coins collected!';}},
 {id:'maximus',icon:'🔷',name:'Maximus Shard',cost:80,desc:'Summons the merchant for 3 levels.',buy:function(){state.shopSummon=3;state.shopOpen=true;return 'Merchant summoned for 3 levels!';}}
 ];
