@@ -62,7 +62,7 @@ const NAMES=[
 const REGIONS=[{name:'Emerald Wilds',icon:'🌲',sky:'linear-gradient(#293e66,#bd8b87)',titles:['Lantern Grove','Whispering Ferns','Foxfire Crossing','Mossy Bridge','Jade Waterfall','Mushroom Hollow','Moonlit Canopy','Old Oak Path','Firefly Lake','The Green Gate'],props:['🏮','🦊','🍄','🌿','🦋','🪵','🦉','🍃','🌳','💚']},{name:'Crystal Dunes',icon:'🏜️',sky:'linear-gradient(#392f65,#f1ae83)',titles:['Golden Drift','Mirage Basin','Sunstone Arch','Sapphire Oasis','Wind-Carved Hall','Sandglass Ridge','Amber Canyon','The Quiet Well','Dune of Echoes','Desert Gate'],props:['🏜️','🦂','🌵','🪬','🦎','💎','🐪','🌞','🪨','🔶']},{name:'Frostpeak Isles',icon:'❄️',sky:'linear-gradient(#234d78,#b7d9e6)',titles:['Snowbell Pass','Glacier Garden','Blue Ice Bridge','Aurora Shelf','Frosted Ruins','Crystal Fjord','Northwind Steps','Frozen Lantern','Silver Summit','Icebound Gate'],props:['❄️','🐺','⛸️','🧊','🦭','🌨️','🐧','💠','🏔️','🌌']},{name:'Sunken Kingdom',icon:'🌊',sky:'linear-gradient(#123f69,#55b9bd)',titles:['Coral Library','Pearl Market','Turtle’s Way','Blue Lantern Reef','Singing Shells','Kelp Cathedral','Whale Song Bay','Pearlstone Steps','The Deep Mirror','Tidal Gate'],props:['🐚','🐠','🐢','🪸','🦑','🐬','🫧','🦀','⚓','🦈']},{name:'Skyfire Citadel',icon:'☁️',sky:'linear-gradient(#44295f,#e88982)',titles:['Cloudstep Harbor','Comet Garden','Stormglass Tower','Sunbird Roost','Starfall Hall','Thunder Bridge','Moonstone Spire','Celestial Court','The Last Stair','Doomspire Arena'],props:['☁️','🦅','☄️','🌠','🪽','⚡','🔮','🌟','🛡️','☠️']}];
 const SPECIAL=[{id:'memory',icon:'📗',name:'Memory Gem',desc:'Doubles XP from future correct answers.'},{id:'crystal',icon:'💠',name:'Crystal Heart',desc:'Revives you once when hearts reach zero.'},{id:'key',icon:'🗝️',name:'Ancient Key',desc:'Halves the price of every shop item.'}];
 const ITEMS=[
-{id:'potion',icon:'🧪',name:'Health Potion',cost:25,desc:'Restore 1 heart (up to 5).',buy:function(){if(state.hearts>=5)return 'Your hearts are already full.';state.hearts++;return 'Restored one heart.'}},
+{id:'potion',icon:'🧪',name:'Health Potion',cost:25,desc:'Restore 1 heart (up to 5).',buy:function(){if(state.hearts>=state.maxHearts)return 'Your hearts are already full.';state.hearts++;return 'Restored one heart.'}},
 {id:'totem',icon:'🪙',name:'Totem of Undying',cost:80,desc:'One emergency revive per run.',buy:function(){if(!state.totem&&!state.revived){state.totem=true;return 'Totem of Undying secured. It can revive you once this run.'}return 'Your Totem has already been purchased or used.'}},
 {id:'hintscroll',icon:'📜',name:'Hint Scroll',cost:15,desc:'Reveal a clue for the current question.',buy:function(){showHint();return 'Hint revealed.'}},
 {id:'shield',icon:'🛡️',name:'Guardian Shield',cost:35,desc:'Blocks the next heart loss.',buy:function(){state.shield++;return 'Guardian Shield activated.'}},
@@ -70,8 +70,12 @@ const ITEMS=[
 {id:'elixir',icon:'⚗️',name:'XP Elixir',cost:30,desc:'Gain 5 bonus XP on your next correct answer.',buy:function(){state.elixir++;return 'XP Elixir ready.'}},
 {id:'streakguard',icon:'🔥',name:'Cold Flame',cost:25,desc:'Protects your streak from the next mistake.',buy:function(){state.streakGuard++;return 'Cold Flame activated! Your streak is protected.'}}
 ];
+const WANDERING_ITEMS=[
+{id:'enchantedtotem',icon:'💛',name:'Enchanted Totem of Undying',cost:100,desc:'Gain 2 golden hearts for 20 question rounds.'},
+{id:'knockback',icon:'⚔️',name:'Knockback Sword',cost:120,desc:'Two uses. Instantly defeats any boss in one hit.'},
+{id:'powerfulpotion',icon:'🧪',name:'Powerful Potion',cost:150,desc:'Choose +5 permanent hearts or complete 5 levels at once.'}
+];
 let state;
-
 const QUEST_TEMPLATES=[
 {id:'answers',title:'Quick Study',desc:'Answer {target} questions correctly.',targets:[3,4,5]},
 {id:'streak',title:'Cold Streak',desc:'Get {target} correct answers in a row.',targets:[3,4]},
@@ -132,7 +136,7 @@ function applyQuestReward(reward){
  if(reward.kind==='coins'){state.coins+=reward.amount;return reward.label;}
  if(reward.kind==='xp'){state.xp+=reward.amount;return reward.label;}
  if(reward.kind==='shard'){state.maximusShards+=reward.amount;return reward.label;}
- if(reward.kind==='heart'){if(state.hearts<5){state.hearts++;return '1 heart';}state.coins+=15;return '15 coins (hearts are full)';}
+ if(reward.kind==='heart'){if(state.hearts<state.maxHearts){state.hearts++;return '1 heart';}state.coins+=15;return '15 coins (hearts are full)';}
  if(reward.kind==='shield'){state.shield+=reward.amount;return 'Guardian Shield';}
  if(reward.kind==='flame'){state.streakGuard+=reward.amount;return 'Cold Flame';}
  return reward.label;
@@ -162,13 +166,13 @@ function redeemMaximusShard(){
  renderAll();
 }
 
-function fresh(){state={level:1,hearts:3,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,inventory:[],trophies:[],hinted:false,locked:false,q:null,maximusShards:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function fresh(){state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],hinted:false,locked:false,q:null,maximusShards:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function say(text,type){$('msg').className='msg'+(type?' '+type:'');$('msg').textContent=text;}
 function regionFor(level){return Math.min(4,Math.floor((level-1)/10));}
 function renderMap(){let r=regionFor(state.level);$('regions').innerHTML=REGIONS.map((x,i)=>'<div class="region '+(i===r?'active':'')+'">'+x.icon+' '+x.name+'</div>').join('');let ns='';for(let i=1;i<=50;i++){let cl='node'+(i<state.level?' cleared':'')+(i===state.level?' current':'')+(i>state.level?' locked':'')+(i%5===0?' boss':'');ns+='<div class="'+cl+'" title="Level '+i+'">'+(i<state.level?'✓':i%5===0?'👹':i)+'</div>';} $('nodes').innerHTML=ns;$('progressText').textContent='Level '+state.level+' / 50';$('regionText').textContent=REGIONS[r].icon+' '+REGIONS[r].name;}
-function renderHud(){$('hearts').textContent=state.hearts>0?'❤️'.repeat(state.hearts):'0';$('xp').textContent=state.xp;$('coins').textContent=state.coins;$('streak').textContent=state.streak;renderMap();$('trophies').textContent='Boss trophies: '+state.trophies.length;}
+function renderHud(){$('hearts').textContent=(state.hearts>0?'❤️'.repeat(state.hearts):'0')+(state.goldenHearts>0?'💛'.repeat(state.goldenHearts):'');$('heartLabel').textContent='HEARTS '+state.hearts+'/'+state.maxHearts;$('goldTimer').textContent=state.goldenRounds>0?'💛 '+state.goldenHearts+' golden · '+state.goldenRounds+' rounds left':'';$('xp').textContent=state.xp;$('coins').textContent=state.coins;$('streak').textContent=state.streak;renderMap();$('trophies').textContent='Boss trophies: '+state.trophies.length;}
 function renderRelics(){$('relics').innerHTML=SPECIAL.map(x=>{let on=state[x.id];return '<div class="relic"><div class="relicicon">'+x.icon+'</div><div><b>'+x.name+'</b><small>'+x.desc+'</small></div><span class="tag '+(on?'on':'')+'">'+(on?'ACTIVE':'LOCKED')+'</span></div>';}).join('');$('inventory').innerHTML=state.inventory.length?state.inventory.map(x=>'<span>'+x+'</span>').join(''):'<span>Empty so far</span>';}
 function renderShop(){let area=$('shopArea');area.innerHTML='<div class="muted" style="margin-bottom:9px">Always open: fair prices for useful supplies.</div><div class="items">'+ITEMS.map(it=>{let cost=state.key?Math.ceil(it.cost/2):it.cost;return '<div class="item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🪙 '+cost+'</div><button class="buy" data-buy="'+it.id+'" '+(state.coins<cost?'disabled':'')+'>Buy</button></div>';}).join('')+'</div>';}
 function startLevel(){state.locked=false;state.hinted=false;state.shopOpen=true;if(state.level%5===0){state.bossMax=state.level===50?10:3;state.bossHp=state.bossMax;}else{state.bossMax=0;state.bossHp=0;}renderScene();renderQuestion();renderAll();renderShop();say(state.level%5===0?'Boss battle! Answer correctly to damage the boss.':'Choose your answer to collect XP and coins.');$('hintline').textContent='Tip: every 5th level is a boss fight.';}
