@@ -76,9 +76,9 @@
 <header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>MEANING QUEST</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><button class="button ghost" id="restart">↻ New run</button></header>
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
 <section class="panel quest-board">
-<div class="panelhead quest-head"><div><h2>📜 Quest Bar</h2><div class="muted">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button></div></div>
+<div class="panelhead quest-head"><div><h2>📜 Quest Bar</h2><div class="muted">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><span class="shard-count" id="zeroidCount">🟣 Zeroid Coins: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button></div></div>
 <div class="quest-grid" id="questCards"></div>
-<div class="quest-footer">🔷 Maximus Shards come from quests. Exchange one for a random bonus — shards are not sold by the trader.</div>
+<div class="quest-footer">🔷 Maximus Shards come from quests and bonus questions. Exchange one for a random bonus reward, including a chance to earn 🟣 Zeroid Coins.</div>
 </section>
 <section class="panel map-panel"><div class="panelhead"><div><h2>🗺️ Adventure map</h2><div class="muted">Clear each node to reach the final boss.</div></div><b id="progressText">Level 1 / 50</b></div><div class="map"><div class="regions" id="regions"></div><div class="nodes" id="nodes"></div><div class="mapfoot"><span><i class="dot" style="background:#ffdc8b"></i>You are here</span><span><i class="dot" style="background:#51b98d"></i>Cleared</span><span>👹 Boss every 5 levels</span><span id="regionText">🌲 Emerald Wilds</span></div></div></section>
 <section class="panel name-reference"><details><summary>📚 All 23 Names of Allah — quick revision</summary><div id="namesList" class="names-grid"></div></details></section>
@@ -149,7 +149,7 @@ function generateQuest(){
 function renderQuests(){
  const area=$('questCards');
  if(!area)return;
- $('shardCount').textContent='🔷 Maximus Shards: '+state.maximusShards;
+ $('shardCount').textContent='🔷 Maximus Shards: '+state.maximusShards;$('zeroidCount').textContent='🟣 Zeroid Coins: '+state.zeroidCoins;
  $('useShard').disabled=state.maximusShards<1;
  area.innerHTML=state.quests.map(q=>{
   const progress=Math.min(q.progress,q.target);
@@ -173,7 +173,7 @@ function updateQuests(event,amount){
  renderQuests();
 }
 function applyQuestReward(reward){
- if(reward.kind==='coins'){state.coins+=reward.amount;return reward.label;}
+ if(reward.kind==='coins'){state.coins+=reward.amount;return reward.label;}if(reward.kind==='zeroid'){state.zeroidCoins+=reward.amount;return reward.label;}
  if(reward.kind==='xp'){state.xp+=reward.amount;return reward.label;}
  if(reward.kind==='shard'){state.maximusShards+=reward.amount;return reward.label;}
  if(reward.kind==='heart'){if(state.hearts<state.maxHearts){state.hearts++;return '1 heart';}state.coins+=15;return '15 coins (hearts are full)';}
@@ -198,20 +198,47 @@ function redeemMaximusShard(){
   {kind:'xp',amount:15,icon:'✨',label:'15 bonus XP'},
   {kind:'heart',amount:1,icon:'❤️',label:'1 heart'},
   {kind:'shield',amount:1,icon:'🛡️',label:'Guardian Shield'},
-  {kind:'flame',amount:1,icon:'🔥',label:'Cold Flame'}
+  {kind:'flame',amount:1,icon:'🔥',label:'Cold Flame'},
+  {kind:'zeroid',amount:3,icon:'🟣',label:'3 Zeroid Coins'}
  ];
  const reward=rewards[Math.floor(Math.random()*rewards.length)];
  const rewardText=applyQuestReward(reward);
  say('Maximus Shard exchanged for '+rewardText+'!','good');
  renderAll();
 }
-
-function fresh(){state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function grantBonusReward(){
+  let reward;
+  if(Math.random()<0.25){
+   reward={kind:'enchantedtotem',label:'Enchanted Totem of Undying'};
+  }else{
+   const pool=[
+    {kind:'shard',label:'1 Maximus Shard'},
+    {kind:'totem',label:'Totem of Undying'},
+    {kind:'shield',label:'Guardian Shield'},
+    {kind:'flame',label:'Cold Flame'}
+   ];
+   reward=pool[Math.floor(Math.random()*pool.length)];
+  }
+  if(reward.kind==='shard'){state.maximusShards++;return reward.label;}
+  if(reward.kind==='totem'){
+   if(state.totem||state.revived){state.coins+=25;return '25 coins (Totem already owned or used)';}
+   state.totem=true;state.inventory.push('🪙 Totem of Undying');return reward.label;
+  }
+  if(reward.kind==='shield'){state.shield++;state.inventory.push('🛡️ Guardian Shield');return reward.label;}
+  if(reward.kind==='flame'){state.streakGuard++;state.inventory.push('🔥 Cold Flame');return reward.label;}
+  if(reward.kind==='enchantedtotem'){
+   if(state.goldenRounds>0){state.coins+=35;return '35 coins (Enchanted Totem already active)';}
+   state.goldenHearts=2;state.goldenRounds=20;state.inventory.push('💛 Enchanted Totem of Undying');showTotemAnimation('enchanted');return reward.label;
+  }
+  return 'Bonus reward';
+}
+function fresh(){state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function say(text,type){$('msg').className='msg'+(type?' '+type:'');$('msg').textContent=text;}
 function escapeHTML(value){return String(value).replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));}
 function isBossLevel(){return state.chamberMode||state.level%5===0;}
+function isBonusLevel(){return !state.chamberMode&&state.level%7===0&&!isBossLevel();}
 function regionFor(level){return Math.min(4,Math.floor((level-1)/10));}
 function renderMap(){if(state.chamberMode){$('regions').innerHTML='<div class="region active">🔐 Secret Chambers</div>';let ns='';for(let i=1;i<=5;i++){let cl='node'+(i<state.chamberFloor?' cleared':'')+(i===state.chamberFloor?' current':'')+(i>state.chamberFloor?' locked':'')+' boss';ns+='<div class="'+cl+'" title="Chamber '+i+'">'+(i<state.chamberFloor?'✓':i===5?'☠️':'👹')+'</div>';}$('nodes').innerHTML=ns;$('progressText').textContent='Chamber '+state.chamberFloor+' / 5';$('regionText').textContent='🔐 Secret Chambers';return;}let r=regionFor(state.level);$('regions').innerHTML=REGIONS.map((x,i)=>'<div class="region '+(i===r?'active':'')+'">'+x.icon+' '+x.name+'</div>').join('');let ns='';for(let i=1;i<=50;i++){let cl='node'+(i<state.level?' cleared':'')+(i===state.level?' current':'')+(i>state.level?' locked':'')+(i%5===0?' boss':'');ns+='<div class="'+cl+'" title="Level '+i+'">'+(i<state.level?'✓':i%5===0?'👹':i)+'</div>';} $('nodes').innerHTML=ns;$('progressText').textContent='Level '+state.level+' / 50';$('regionText').textContent=REGIONS[r].icon+' '+REGIONS[r].name;}
 function renderNamesReference(){$('namesList').innerHTML=NAMES.map((n,i)=>'<div class="name-card"><b>'+(i+1)+'. '+escapeHTML(n[0])+'</b><small>'+escapeHTML(n[1])+'</small></div>').join('');}
@@ -355,10 +382,41 @@ function useKnockbackSword(){
  if(state.level<=50){say('KNOCKBACK! Level '+defeatedLevel+' boss defeated in one hit. Sword uses left: '+state.knockbackUses+'.','good');renderAll();}
 }
 
-function startLevel(){state.locked=false;state.hinted=false;state.shopOpen=true;if(state.chamberMode){state.wanderingTraderHere=false;}else{const guaranteed=state.levelsSinceWanderer>=2;state.wanderingTraderHere=guaranteed||Math.random()<0.6;state.levelsSinceWanderer=state.wanderingTraderHere?0:state.levelsSinceWanderer+1;}if(state.chamberMode){state.bossMax=state.chamberFloor===5?10:3;state.bossHp=state.bossMax;}else if(state.level%5===0){state.bossMax=state.level===50?10:3;state.bossHp=state.bossMax;}else{state.bossMax=0;state.bossHp=0;}renderScene();renderQuestion();renderAll();renderShop();say(isBossLevel()?(state.chamberMode?'Secret chamber boss! Defeat the guardian to advance.':'Boss battle! Answer correctly to damage the boss.'):'Choose your answer to collect XP and coins.');$('hintline').textContent=state.chamberMode?'Every chamber has a boss. KillSwitch has 10 hearts.':'Tip: every 5th level is a boss fight.';}
-function renderScene(){if(state.chamberMode){let s=CHAMBER_SCENES[state.chamberFloor-1];$('sceneKicker').textContent='Secret Chambers · Boss '+state.chamberFloor+' / 5';$('sceneTitle').textContent=s.name;$('sceneBadge').className='badge boss';$('sceneBadge').textContent=state.chamberFloor===5?'☠️ KILLSWITCH':'👹 CHAMBER BOSS';$('art').style.background=s.sky;$('prop1').textContent=s.props[0];$('prop2').textContent=s.props[1];$('prop3').textContent=s.props[2];$('sun').textContent='🌑';$('cloud').textContent='⚡';$('artlabel').textContent='SECRET CHAMBERS · '+s.name.toUpperCase();return;}let ix=regionFor(state.level),reg=REGIONS[ix],step=(state.level-1)%10;let title=reg.titles[step];$('sceneKicker').textContent='Level '+state.level+' · '+(state.level%5===0?'Boss challenge':'Explore');$('sceneTitle').textContent=title;$('sceneBadge').className='badge'+(state.level%5===0?' boss':'');$('sceneBadge').textContent=state.level===50?'☠️ FINAL BOSS':state.level%5===0?'👹 BOSS BATTLE':'🧭 EXPLORING';$('art').style.background=reg.sky;$('prop1').textContent=reg.props[step];$('prop2').textContent=reg.props[(step+3)%10];$('prop3').textContent=reg.props[(step+6)%10];$('sun').textContent=['🌙','☀️','✨','🌊','🌟'][ix];$('cloud').textContent=['☁️','🌬️','❄️','🫧','☁️'][ix];$('artlabel').textContent=reg.name+' · '+title;}
-function makeQuestion(previous=null){let idx=Math.floor(Math.random()*NAMES.length),askMeaning=Math.random()<.5;if(previous&&!previous.custom&&idx===previous.idx&&askMeaning===previous.askMeaning)askMeaning=!askMeaning;let pair=NAMES[idx],correct=askMeaning?pair[1]:pair[0],pool=NAMES.map(n=>askMeaning?n[1]:n[0]).filter(v=>v!==correct),opts=shuffle([correct,...shuffle(pool).slice(0,3)]);state.hinted=false;state.q={idx:idx,correct:correct,options:opts,askMeaning:askMeaning};renderQuestion();}
-function renderQuestion(){if(!state.q)makeQuestion();$('continue').style.display='none';let q=state.q;let pair=q.custom?null:NAMES[q.idx];$('question').textContent=q.custom?q.prompt:(q.askMeaning?'What does '+pair[0]+' mean?':'Which Name means “'+pair[1]+'”?');$('note').textContent=q.custom?'Custom question · edited with the Quill of Exchange. Choose 1 of 4 answers.':'Question '+Math.min(23,((state.level-1)%23)+1)+' of the Names revision set. Choose 1 of 4 answers.';$('qkicker').textContent=isBossLevel()?'Boss battle · Knowledge strike':'Knowledge quest';$('answers').innerHTML=q.options.map((op,i)=>'<button class="answer" data-answer="'+encodeURIComponent(op)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+escapeHTML(op)+'</span></button>').join('');$('answers').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>answer(decodeURIComponent(b.dataset.answer),b)));renderBoss();}
+function startLevel(){
+ state.locked=false;state.hinted=false;state.shopOpen=true;
+ if(state.chamberMode){state.wanderingTraderHere=false;}
+ else{const guaranteed=state.levelsSinceWanderer>=2;state.wanderingTraderHere=guaranteed||Math.random()<0.6;state.levelsSinceWanderer=state.wanderingTraderHere?0:state.levelsSinceWanderer+1;}
+ if(state.chamberMode){state.bossMax=state.chamberFloor===5?10:3;state.bossHp=state.bossMax;}
+ else if(state.level%5===0){state.bossMax=state.level===50?10:3;state.bossHp=state.bossMax;}
+ else{state.bossMax=0;state.bossHp=0;}
+ renderScene();
+ state.q=null;
+ const bonus=isBonusLevel();
+ makeQuestion(null,bonus);
+ renderAll();renderShop();
+ say(bonus?'🎁 BONUS QUESTION! Answer correctly to win a special reward.':isBossLevel()?(state.chamberMode?'Secret chamber boss! Defeat the guardian to advance.':'Boss battle! Answer correctly to damage the boss.'):'Choose your answer to collect XP and coins.');
+ $('hintline').textContent=state.chamberMode?'Every chamber has a boss. KillSwitch has 10 hearts.':bonus?'Bonus reward available for a correct answer!':'Tip: every 5th level is a boss fight.';
+}
+function renderScene(){
+ if(state.chamberMode){let s=CHAMBER_SCENES[state.chamberFloor-1];$('sceneKicker').textContent='Secret Chambers · Boss '+state.chamberFloor+' / 5';$('sceneTitle').textContent=s.name;$('sceneBadge').className='badge boss';$('sceneBadge').textContent=state.chamberFloor===5?'☠️ KILLSWITCH':'👹 CHAMBER BOSS';$('art').style.background=s.sky;$('prop1').textContent=s.props[0];$('prop2').textContent=s.props[1];$('prop3').textContent=s.props[2];$('sun').textContent='🌑';$('cloud').textContent='⚡';$('artlabel').textContent='SECRET CHAMBERS · '+s.name.toUpperCase();return;}
+ let ix=regionFor(state.level),reg=REGIONS[ix],step=(state.level-1)%10,title=reg.titles[step];
+ $('sceneKicker').textContent='Level '+state.level+' · '+(state.level%5===0?'Boss challenge':isBonusLevel()?'Bonus question':'Explore');
+ $('sceneTitle').textContent=title;
+ $('sceneBadge').className='badge'+(state.level%5===0?' boss':'');
+ $('sceneBadge').textContent=state.level===50?'☠️ FINAL BOSS':state.level%5===0?'👹 BOSS BATTLE':isBonusLevel()?'🎁 BONUS QUESTION':'🧭 EXPLORING';
+ $('art').style.background=reg.sky;$('prop1').textContent=reg.props[step];$('prop2').textContent=reg.props[(step+3)%10];$('prop3').textContent=reg.props[(step+6)%10];$('sun').textContent=['🌙','☀️','✨','🌊','🌟'][ix];$('cloud').textContent=['☁️','🌬️','❄️','🫧','☁️'][ix];$('artlabel').textContent=reg.name+' · '+title;
+}
+function renderQuestion(){
+ if(!state.q)makeQuestion();
+ $('continue').style.display='none';
+ let q=state.q,pair=q.custom?null:NAMES[q.idx];
+ $('question').textContent=q.custom?q.prompt:(q.askMeaning?'What does '+pair[0]+' mean?':'Which Name means “'+pair[1]+'”?');
+ $('note').textContent=q.custom?'Custom question. Choose 1 of 4 answers.':q.bonus?'🎁 BONUS QUESTION! Answer correctly to earn a special reward. A wrong answer forfeits the bonus.':'Question '+Math.min(23,((state.level-1)%23)+1)+' of the Names revision set. Choose 1 of 4 answers.';
+ $('qkicker').textContent=q.bonus?'🎁 Bonus question · Special reward':isBossLevel()?'Boss battle · Knowledge strike':'Knowledge quest';
+ $('answers').innerHTML=q.options.map((op,i)=>'<button class="answer" data-answer="'+encodeURIComponent(op)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+escapeHTML(op)+'</span></button>').join('');
+ $('answers').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>answer(decodeURIComponent(b.dataset.answer),b)));
+ renderBoss();
+}
 function renderBoss(){let box=$('bossPanel');if(!isBossLevel()){box.innerHTML='';return;}let hearts='';for(let i=0;i<state.bossMax;i++)hearts+='<span class="bossheart '+(i>=state.bossHp?'lost':'')+'">'+(i<state.bossHp?'♥':'×')+'</span>';let name=state.chamberMode?(state.chamberFloor===5?'☠️ KILLSWITCH':'👹 '+CHAMBER_SCENES[state.chamberFloor-1].boss):(state.level===50?'☠️ THE DESTRUCTED':'👹 Level '+state.level+' Boss');box.innerHTML='<div class="bossbox"><div class="bosstop"><span>'+name+'</span><span>'+state.bossHp+' / '+state.bossMax+' HP</span></div><div class="bosshearts">'+hearts+'</div></div>';}
 function awardBoss(){state.trophies.push('🏆 Boss trophy · Lv '+state.level);state.bossesDefeated++;updateQuests('boss');let missing=SPECIAL.filter(s=>!state[s.id]);if(missing.length){let got=missing[Math.floor(Math.random()*missing.length)];state[got.id]=true;say('Boss defeated! You earned '+got.name+' — '+got.desc,'good');}else{say('Boss defeated! Another trophy added to your collection.','good');}}
 function activateTotemRevive(){
@@ -371,7 +429,7 @@ function activateTotemRevive(){
  showTotemAnimation('revive');
  return true;
 }
-function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(isBossLevel()){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{let known=NAMES.find(n=>n[0]===op||n[1]===op);say(state.q.custom?'Correct! Edited question answered. +'+points+' XP, +'+gain+' coins.':known?'Correct! '+known[0]+' — '+known[1]+'. +'+points+' XP, +'+gain+' coins.':'Correct! +'+points+' XP, +'+gain+' coins.','good');}renderAll();if(!isBossLevel()){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(activateTotemRevive()){}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
+function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(isBossLevel()){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{let known=NAMES.find(n=>n[0]===op||n[1]===op);say(state.q.custom?'Correct! Edited question answered. +'+points+' XP, +'+gain+' coins.':known?'Correct! '+known[0]+' — '+known[1]+'. +'+points+' XP, +'+gain+' coins.':'Correct! +'+points+' XP, +'+gain+' coins.','good');}if(state.q.bonus){const rewardText=grantBonusReward();state.locked=false;state.q=null;makeQuestion();renderAll();say('🎁 BONUS CLEARED! You earned '+rewardText+'. Now answer the regular level question.','good');return;}renderAll();if(!isBossLevel()){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(activateTotemRevive()){}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
 function advanceLevel(fromBoss){if(state.chamberMode){if(state.chamberFloor>=5){finishSecretChambers();return;}state.chamberFloor++;state.level=state.chamberFloor;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}state.cleared=Math.max(state.cleared,state.level);updateQuests('level');state.level++;state.q=null;if(state.level>50){endGame(true);return;}state.shopOpen=true;startLevel();if(fromBoss&&state.trophies.length)renderRelics();}
 function renderAll(){renderHud();renderRelics();renderBoss();renderShop();renderQuests();renderWanderingTrader();}
 function showHint(){if(!state.q)return;if(state.locked){say('Finish the current answer before using a hint.','bad');return;}if(state.hinted){say('You have already used a hint on this question.','bad');return;}if(state.hintUses<=0){say('No hints left. Buy a Hint Scroll from the Trader for 30 coins.','bad');return;}let correct=state.q.correct;let b=[...document.querySelectorAll('.answer')];let wrong=b.filter(x=>decodeURIComponent(x.dataset.answer)!==correct);shuffle(wrong).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.25';});$('hintline').textContent='Hint: '+(state.q.askMeaning?'The correct meaning begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”':'The correct Name begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”');state.hintUses--;state.hinted=true;renderRelics();say('Hint used! '+state.hintUses+' hint(s) remaining.','good');}
@@ -418,7 +476,7 @@ function exitSecretCodeModal(){$('secretCodeModal').classList.remove('show');}
 function restart(){fresh();$('modal').classList.remove('show');startLevel();}
 $('answers').addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b&&!b.disabled)answer(decodeURIComponent(b.dataset.answer),b);});
 $('shopArea').addEventListener('click',e=>{let b=e.target.closest('[data-buy]');if(b)buy(b.dataset.buy);});$('wanderingArea').addEventListener('click',e=>{let b=e.target.closest('[data-wanderbuy]');if(b)buyWandering(b.dataset.wanderbuy);let sword=e.target.closest('[data-use-sword]');if(sword)useKnockbackSword();});$('potionHearts').addEventListener('click',choosePotionHearts);$('potionSkip').addEventListener('click',skipFiveLevels);
-$('continue').addEventListener('click',()=>{if(!state.locked)return;state.locked=false;state.q=null;$('continue').style.display='none';makeQuestion();say('Next question — you’ve got this!','good');});$('hint').addEventListener('click',showHint);$('questCards').addEventListener('click',e=>{let b=e.target.closest('[data-claimquest]');if(b)claimQuest(Number(b.dataset.claimquest));});$('useShard').addEventListener('click',redeemMaximusShard);
+$('continue').addEventListener('click',()=>{if(!state.locked)return;const wasBonus=!!(state.q&&state.q.bonus);state.locked=false;state.q=null;$('continue').style.display='none';makeQuestion();say(wasBonus?'Bonus question missed — no bonus reward this time. The regular level question comes next.':'Next question — you’ve got this!','good');});$('hint').addEventListener('click',showHint);$('questCards').addEventListener('click',e=>{let b=e.target.closest('[data-claimquest]');if(b)claimQuest(Number(b.dataset.claimquest));});$('useShard').addEventListener('click',redeemMaximusShard);
 $('secretCodeLink').addEventListener('click',e=>{e.preventDefault();openSecretCode();});$('secretCodeForm').addEventListener('submit',e=>{e.preventDefault();submitSecretCode();});$('secretCodeCancel').addEventListener('click',exitSecretCodeModal);$('quillButton').addEventListener('click',openQuillExchange);$('quillExchange').addEventListener('click',exchangeQuillQuestion);$('quillCancel').addEventListener('click',()=>$('quillModal').classList.remove('show'));$('restart').addEventListener('click',restart);$('modalRestart').addEventListener('click',restart);
 fresh();renderNamesReference();startLevel();
 })();
