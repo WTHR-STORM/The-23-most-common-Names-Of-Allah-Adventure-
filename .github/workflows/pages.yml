@@ -11,7 +11,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  # Let this one recovery publish bypass an older stuck Pages run; future publishes use the normal single Pages queue.
+  group: ${{ github.event_name == 'push' && github.event.head_commit.message == 'Make Golden Trials code reveal obvious and instant' && format('pages-recovery-{0}', github.run_id) || 'pages' }}
   cancel-in-progress: true
 
 jobs:
