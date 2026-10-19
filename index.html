@@ -147,7 +147,8 @@ const ZEROID_ITEMS=[
   {id:'flame',icon:'🔥',name:'Cold Flame',cost:2,desc:'Protect your streak from the next mistake.'},
   {id:'quill',icon:'🖋️',name:'Quill of Exchange',cost:4,desc:'Add one question-exchange use.'},
   {id:'totem',icon:'🪙',name:'Totem of Undying',cost:5,desc:'Revive once with 1 heart.'},
-  {id:'enchanted',icon:'💛',name:'Enchanted Totem',cost:6,desc:'Gain 2 golden hearts for 20 question rounds.'}
+  {id:'enchanted',icon:'💛',name:'Enchanted Totem',cost:6,desc:'Gain 2 golden hearts for 20 question rounds.'},
+  {id:'amulet',icon:'🧿',name:'Amulet of Colossus',cost:3,desc:'Turn this level into a bonus challenge. Answer correctly for a bonus reward, then continue the level.'}
  ];
 const WANDERING_ITEMS=[
 {id:'enchantedtotem',icon:'💛',name:'Enchanted Totem of Undying',cost:100,desc:'Gain 2 golden hearts for 20 question rounds.'},
@@ -272,9 +273,16 @@ function grantBonusReward(){
   }
   return 'Bonus reward';
 }
-function fresh(){state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function fresh(){state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function rollShopStock(){
+ const pick=items=>shuffle(items.map(item=>item.id)).slice(0,Math.min(2,items.length));
+ state.regularOutOfStock=pick(ITEMS);
+ state.wanderingOutOfStock=pick(WANDERING_ITEMS);
+ state.zeroidOutOfStock=pick(ZEROID_ITEMS);
+ state.amuletUsedThisLevel=false;
+}
 function say(text,type){$('msg').className='msg'+(type?' '+type:'');$('msg').textContent=text;}
 function escapeHTML(value){return String(value).replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));}
 const HELP_TIPS={
@@ -284,7 +292,7 @@ const HELP_TIPS={
  quiz:[['Hints','You start with one free hint. Use it once per question to remove two wrong choices. Extra hints cost 30 normal coins at the regular Trader.'],['Quill of Exchange','Use it to replace the current question with a random one. Each use costs one charge.']],
  inventory:[['Inventory','Items and titles collected this run appear here. Hint charges are shown as a count.'],['Secret Chambers reward','When the five hidden bosses are defeated, choose the Quill of Exchange (3 uses) or 5 Zeroid Coins.']],
  trader:[['Regular Trader','Always available. Buy normal supplies using regular coins.'],['Wandering Trader','Carries rarer items and may appear at new levels.'],['Zeroid Shop','Appears during boss levels only. It uses Zeroid Coins, not normal coins.']],
- zeroid:[['Zeroid Shop','This shop opens whenever the current level is a boss level. Items cost Zeroid Coins, shown with a purple coin icon.'],['Tip','The shop closes away from boss levels. Save Zeroid Coins for the items you want most.']]
+ zeroid:[['Zeroid Shop','This shop opens whenever the current level is a boss level. Items cost Zeroid Coins, shown with a purple coin icon. Two random items are out of stock each level, and stock refreshes when you advance.'],['Amulet of Colossus','Costs 3 Zeroid Coins. It turns the current level question into a bonus challenge. Answer correctly to receive a bonus reward, then continue the level.'],['Tip','The shop closes away from boss levels. Save Zeroid Coins for the items you want most.']]
 };
 function openHelp(topic='all'){
  const key=HELP_TIPS[topic]?topic:'all';
@@ -301,7 +309,15 @@ function renderMap(){if(state.chamberMode){$('regions').innerHTML='<div class="r
 function renderNamesReference(){$('namesList').innerHTML=NAMES.map((n,i)=>'<div class="name-card"><b>'+(i+1)+'. '+escapeHTML(n[0])+'</b><small>'+escapeHTML(n[1])+'</small></div>').join('');}
 function renderHud(){$('hearts').textContent=(state.hearts>0?'❤️'.repeat(state.hearts):'0')+(state.goldenHearts>0?'💛'.repeat(state.goldenHearts):'');$('heartLabel').textContent='HEARTS '+state.hearts+'/'+state.maxHearts;$('goldTimer').textContent=state.goldenRounds>0?'💛 '+state.goldenHearts+' golden · '+state.goldenRounds+' rounds left':'';$('xp').textContent=state.xp;$('coins').textContent=state.coins;$('streak').textContent=state.streak;renderMap();$('trophies').textContent='Boss trophies: '+state.trophies.length;}
 function renderRelics(){$('relics').innerHTML=SPECIAL.map(x=>{let on=state[x.id];return '<div class="relic"><div class="relicicon">'+x.icon+'</div><div><b>'+x.name+'</b><small>'+x.desc+'</small></div><span class="tag '+(on?'on':'')+'">'+(on?'ACTIVE':'LOCKED')+'</span></div>';}).join('');const loot=state.inventory.slice();if(state.hintUses>0)loot.push('📜 Hint Scroll × '+state.hintUses);$('inventory').innerHTML=loot.length?loot.map(x=>'<span>'+escapeHTML(x)+'</span>').join(''):'<span>Empty so far</span>';$('titles').innerHTML=state.titles.length?'Titles: '+state.titles.map(t=>'<span class="title-badge">🏅 '+escapeHTML(t)+'</span>').join(''):'Titles: none yet';$('quillButton').style.display=state.quillUses>0?'inline-flex':'none';$('quillButton').textContent='🖋️ Exchange ('+state.quillUses+')';$('hint').textContent='💡 Hint ('+state.hintUses+')';}
-function renderShop(){let area=$('shopArea');area.innerHTML='<div class="muted" style="margin-bottom:9px">Always open: fair prices for useful supplies.</div><div class="items">'+ITEMS.map(it=>{let cost=state.key?Math.ceil(it.cost/2):it.cost;return '<div class="item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🪙 '+cost+'</div><button class="buy" data-buy="'+it.id+'" '+(state.coins<cost?'disabled':'')+'>Buy</button></div>';}).join('')+'</div>';}
+function renderShop(){
+ let area=$('shopArea');
+ const outNote='<div class="muted" style="margin-bottom:9px">Two random items are out of stock this level. Stock refreshes every level.</div>';
+ area.innerHTML=outNote+'<div class="items">'+ITEMS.map(it=>{
+  let cost=state.key?Math.ceil(it.cost/2):it.cost;
+  const out=state.regularOutOfStock.includes(it.id);
+  return '<div class="item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🪙 '+cost+'</div><button class="buy" data-buy="'+it.id+'" '+(out||state.coins<cost?'disabled':'')+'>'+(out?'Out of stock · next level':'Buy')+'</button></div>';
+ }).join('')+'</div>';
+}
 
 function renderWanderingTrader(){
  const area=$('wanderingArea');
@@ -313,10 +329,11 @@ function renderWanderingTrader(){
   return;
  }
  $('wanderingBadge').textContent='🟢 ARRIVED';
- let html='<div class="wander-status">The wandering trader has arrived for this level. Their rare stock is only available while they are here.</div><div class="items">'+WANDERING_ITEMS.map(it=>{
+ let html='<div class="wander-status">The wandering trader has arrived for this level. Two items are out of stock; stock refreshes next level.</div><div class="items">'+WANDERING_ITEMS.map(it=>{
   const cost=state.key?Math.ceil(it.cost/2):it.cost;
   const unavailable=(it.id==='enchantedtotem'&&state.goldenRounds>0)||(it.id==='knockback'&&state.knockbackUses>0)||(it.id==='powerfulpotion'&&state.powerPotionPending);
-  return '<div class="wander-item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🪙 '+cost+'</div><button class="buy" data-wanderbuy="'+it.id+'" '+(state.coins<cost||unavailable?'disabled':'')+'>'+(unavailable?'Already active':'Buy')+'</button></div>';
+  const out=state.wanderingOutOfStock.includes(it.id);
+  return '<div class="wander-item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🪙 '+cost+'</div><button class="buy" data-wanderbuy="'+it.id+'" '+(state.coins<cost||unavailable||out?'disabled':'')+'>'+(out?'Out of stock · next level':unavailable?'Already active':'Buy')+'</button></div>';
  }).join('')+'</div>';
  if(state.goldenRounds>0&&state.goldenHearts>0)html+='<div class="wander-special"><b>💛 Enchanted Totem active</b><small>'+state.goldenHearts+' golden heart(s) remaining · '+state.goldenRounds+' question rounds left.</small></div>';
  if(state.knockbackUses>0)html+='<div class="wander-special"><b>⚔️ Knockback Sword · '+state.knockbackUses+' uses left</b><small>Use it during a boss fight to defeat the boss instantly.</small><button class="buy" data-use-sword '+(state.level%5!==0?'disabled':'')+'>'+(state.level%5===0?'⚔️ Use sword on boss':'Available on boss levels only')+'</button></div>';
@@ -365,6 +382,7 @@ function buyWandering(id){
  if(!state.wanderingTraderHere){say('The wandering trader has left. Look for them on another level.','bad');return;}
  const it=WANDERING_ITEMS.find(x=>x.id===id);
  if(!it)return;
+ if(state.wanderingOutOfStock.includes(id)){say('That item is out of stock until the next level.','bad');return;}
  if(id==='enchantedtotem'&&state.goldenRounds>0){say('Your Enchanted Totem is already active.','bad');return;}
  if(id==='knockback'&&state.knockbackUses>0){say('You already have a Knockback Sword with uses remaining.','bad');return;}
  if(id==='powerfulpotion'&&state.powerPotionPending){say('Choose your current Powerful Potion effect first.','bad');return;}
@@ -441,6 +459,7 @@ function useKnockbackSword(){
 
 function startLevel(){
  state.locked=false;state.hinted=false;state.shopOpen=true;
+ rollShopStock();
  if(state.chamberMode){state.wanderingTraderHere=false;}
  else{const guaranteed=state.levelsSinceWanderer>=2;state.wanderingTraderHere=guaranteed||Math.random()<0.6;state.levelsSinceWanderer=state.wanderingTraderHere?0:state.levelsSinceWanderer+1;}
  if(state.chamberMode){state.bossMax=state.chamberFloor===5?10:3;state.bossHp=state.bossMax;}
@@ -497,24 +516,30 @@ function activateTotemRevive(){
  showTotemAnimation('revive');
  return true;
 }
-function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(isBossLevel()){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{let known=NAMES.find(n=>n[0]===op||n[1]===op);say(state.q.custom?'Correct! Edited question answered. +'+points+' XP, +'+gain+' coins.':known?'Correct! '+known[0]+' — '+known[1]+'. +'+points+' XP, +'+gain+' coins.':'Correct! +'+points+' XP, +'+gain+' coins.','good');}if(state.q.bonus){const rewardText=grantBonusReward();state.locked=false;state.q=null;makeQuestion();renderAll();say('🎁 BONUS CLEARED! You earned '+rewardText+'. Now answer the regular level question.','good');return;}renderAll();if(!isBossLevel()){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(activateTotemRevive()){}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
+function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(state.q.bonus){const rewardText=grantBonusReward();state.locked=false;state.q=null;makeQuestion();renderAll();say('🎁 BONUS CLEARED! You earned '+rewardText+'. Now answer the regular level question.','good');return;}if(isBossLevel()){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{let known=NAMES.find(n=>n[0]===op||n[1]===op);say(state.q.custom?'Correct! Edited question answered. +'+points+' XP, +'+gain+' coins.':known?'Correct! '+known[0]+' — '+known[1]+'. +'+points+' XP, +'+gain+' coins.':'Correct! +'+points+' XP, +'+gain+' coins.','good');}renderAll();if(!isBossLevel()){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(activateTotemRevive()){}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
 function advanceLevel(fromBoss){if(state.chamberMode){if(state.chamberFloor>=5){finishSecretChambers();return;}state.chamberFloor++;state.level=state.chamberFloor;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}state.cleared=Math.max(state.cleared,state.level);updateQuests('level');state.level++;state.q=null;if(state.level>50){endGame(true);return;}state.shopOpen=true;startLevel();if(fromBoss&&state.trophies.length)renderRelics();}
 function renderZeroidShop(){
-  const panel=$('zeroidShopPanel');
-  if(!panel)return;
-  const available=isBossLevel();
-  panel.style.display=available?'block':'none';
-  if(!available)return;
-  $('zeroidShopBalance').textContent='Available: 🟣 '+state.zeroidCoins+' Zeroid Coins';
-  $('zeroidShopArea').innerHTML=ZEROID_ITEMS.map(it=>{
-   const unavailable=(it.id==='totem'&&(state.totem||state.revived))||(it.id==='enchanted'&&state.goldenRounds>0);
-   const noFunds=state.zeroidCoins<it.cost;
-   return '<div class="item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🟣 '+it.cost+' Zeroid Coins</div><button class="buy" data-zeroid-buy="'+it.id+'" '+(unavailable||noFunds?'disabled':'')+'>'+(unavailable?'Already owned or active':noFunds?'Not enough Zeroid Coins':'Buy')+'</button></div>';
-  }).join('');
- }
+ const panel=$('zeroidShopPanel');
+ if(!panel)return;
+ const available=isBossLevel();
+ panel.style.display=available?'block':'none';
+ if(!available)return;
+ $('zeroidShopBalance').textContent='Available: 🟣 '+state.zeroidCoins+' Zeroid Coins · Two items out of stock; refreshes next level.';
+ $('zeroidShopArea').innerHTML=ZEROID_ITEMS.map(it=>{
+  const unavailable=(it.id==='totem'&&(state.totem||state.revived))||(it.id==='enchanted'&&state.goldenRounds>0)||(it.id==='amulet'&&state.amuletUsedThisLevel);
+  const out=state.zeroidOutOfStock.includes(it.id);
+  const noFunds=state.zeroidCoins<it.cost;
+  const disabled=out||unavailable||noFunds;
+  const label=out?'Out of stock · next level':unavailable?(it.id==='amulet'?'Already used this level':'Already owned or active'):noFunds?'Not enough Zeroid Coins':'Buy';
+  return '<div class="item"><div class="itemtop"><span>'+it.icon+'</span><strong>'+it.name+'</strong></div><small>'+it.desc+'</small><div class="cost">🟣 '+it.cost+' Zeroid Coins</div><button class="buy" data-zeroid-buy="'+it.id+'" '+(disabled?'disabled':'')+'>'+label+'</button></div>';
+ }).join('');
+}
  function buyZeroid(id){
   if(!isBossLevel()){say('The Zeroid Shop is only open on boss levels.','bad');return;}
   const it=ZEROID_ITEMS.find(x=>x.id===id);if(!it)return;
+  if(state.zeroidOutOfStock.includes(id)){say('That Zeroid Shop item is out of stock until the next level.','bad');return;}
+  if(id==='amulet'&&state.locked){say('Finish the current question before activating the Amulet of Colossus.','bad');return;}
+  if(id==='amulet'&&state.amuletUsedThisLevel){say('You have already used the Amulet of Colossus this level.','bad');return;}
   if(state.zeroidCoins<it.cost){say('You need '+it.cost+' Zeroid Coins for '+it.name+'.','bad');return;}
   if(id==='totem'&&(state.totem||state.revived)){say('You already own or used your Totem this run.','bad');return;}
   if(id==='enchanted'&&state.goldenRounds>0){say('Your Enchanted Totem is already active.','bad');return;}
@@ -525,11 +550,19 @@ function renderZeroidShop(){
   else if(id==='quill'){state.quillUses++;say('Quill of Exchange charge added! Uses: '+state.quillUses+'.','good');}
   else if(id==='totem'){state.totem=true;state.inventory.push('🪙 Totem of Undying');say('Totem of Undying purchased with Zeroid Coins.','good');}
   else if(id==='enchanted'){state.goldenHearts=2;state.goldenRounds=20;state.inventory.push('💛 Enchanted Totem of Undying');showTotemAnimation('enchanted');say('Enchanted Totem purchased! Two golden hearts are active.','good');}
+  else if(id==='amulet'){
+   state.amuletUsedThisLevel=true;
+   state.inventory.push('🧿 Amulet of Colossus');
+   if(!state.q)makeQuestion();
+   state.q.bonus=true;
+   renderQuestion();
+   say('🧿 Amulet of Colossus activated! This level is now a bonus challenge. Answer correctly for a bonus reward, then continue the level.','good');
+  }
   renderAll();
  }
  function renderAll(){renderHud();renderRelics();renderBoss();renderShop();renderQuests();renderWanderingTrader();renderZeroidShop();}
 function showHint(){if(!state.q)return;if(state.locked){say('Finish the current answer before using a hint.','bad');return;}if(state.hinted){say('You have already used a hint on this question.','bad');return;}if(state.hintUses<=0){say('No hints left. Buy a Hint Scroll from the Trader for 30 coins.','bad');return;}let correct=state.q.correct;let b=[...document.querySelectorAll('.answer')];let wrong=b.filter(x=>decodeURIComponent(x.dataset.answer)!==correct);shuffle(wrong).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.25';});$('hintline').textContent='Hint: '+(state.q.askMeaning?'The correct meaning begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”':'The correct Name begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”');state.hintUses--;state.hinted=true;renderRelics();say('Hint used! '+state.hintUses+' hint(s) remaining.','good');}
-function buy(id){let it=ITEMS.find(x=>x.id===id);if(!it)return;let cost=state.key?Math.ceil(it.cost/2):it.cost;if(state.coins<cost)return;let msg=it.buy();if(msg==='Your hearts are already full.'||msg==='Your Totem has already been purchased or used.') {say(msg,'bad');return;}state.coins-=cost;if(it.id!=='hintscroll'&&!state.inventory.includes(it.icon+' '+it.name))state.inventory.push(it.icon+' '+it.name);say(msg,'good');renderAll();}
+function buy(id){let it=ITEMS.find(x=>x.id===id);if(!it)return;if(state.regularOutOfStock.includes(id)){say('That item is out of stock until the next level.','bad');return;}let cost=state.key?Math.ceil(it.cost/2):it.cost;if(state.coins<cost)return;let msg=it.buy();if(msg==='Your hearts are already full.'||msg==='Your Totem has already been purchased or used.') {say(msg,'bad');return;}state.coins-=cost;if(it.id!=='hintscroll'&&!state.inventory.includes(it.icon+' '+it.name))state.inventory.push(it.icon+' '+it.name);say(msg,'good');renderAll();}
 function endGame(win){state.locked=true;$('modalIcon').textContent=win?'🏆':'💔';$('modalTitle').textContent=win?'The Quest Is Complete!':'Game Over';$('modalText').textContent=win?'You defeated THE DESTRUCTED and cleared all 50 levels! Final score: '+state.xp+' XP and '+state.coins+' coins.':'You reached level '+state.level+' and earned '+state.xp+' XP. Start a new run and try again!';$('modal').classList.add('show');}
 
 function openSecretCode(){
@@ -545,7 +578,7 @@ function submitSecretCode(){
   return;
  }
  if(state.locked){$('secretCodeMessage').textContent='Finish the current answer first, then enter the chambers.';return;}
- state.chamberSavedState={level:state.level,q:state.q?{...state.q,options:state.q.options.slice()}:null,bossHp:state.bossHp,bossMax:state.bossMax,hinted:state.hinted,wanderingTraderHere:state.wanderingTraderHere,shopOpen:state.shopOpen};
+ state.chamberSavedState={level:state.level,q:state.q?{...state.q,options:state.q.options.slice()}:null,bossHp:state.bossHp,bossMax:state.bossMax,hinted:state.hinted,wanderingTraderHere:state.wanderingTraderHere,shopOpen:state.shopOpen,regularOutOfStock:state.regularOutOfStock.slice(),wanderingOutOfStock:state.wanderingOutOfStock.slice(),zeroidOutOfStock:state.zeroidOutOfStock.slice(),amuletUsedThisLevel:state.amuletUsedThisLevel};
  state.chamberMode=true;state.chamberFloor=1;state.level=1;state.q=null;state.locked=false;state.hinted=false;state.wanderingTraderHere=false;
  $('secretCodeModal').classList.remove('show');
  startLevel();
@@ -555,7 +588,7 @@ function finishSecretChambers(){
  const saved=state.chamberSavedState;
  state.chamberMode=false;state.chamberFloor=0;state.chamberSavedState=null;state.chambersCompleted=true;state.chamberRewardChosen=false;
  if(!state.titles.includes('Freed the Chambers'))state.titles.push('Freed the Chambers');
- if(saved){state.level=saved.level;state.q=saved.q;state.bossHp=saved.bossHp;state.bossMax=saved.bossMax;state.hinted=saved.hinted;state.wanderingTraderHere=saved.wanderingTraderHere;state.shopOpen=saved.shopOpen;}
+ if(saved){state.level=saved.level;state.q=saved.q;state.bossHp=saved.bossHp;state.bossMax=saved.bossMax;state.hinted=saved.hinted;state.wanderingTraderHere=saved.wanderingTraderHere;state.shopOpen=saved.shopOpen;state.regularOutOfStock=saved.regularOutOfStock||[];state.wanderingOutOfStock=saved.wanderingOutOfStock||[];state.zeroidOutOfStock=saved.zeroidOutOfStock||[];state.amuletUsedThisLevel=!!saved.amuletUsedThisLevel;}
  state.locked=false;state.hinted=false;
  renderScene();renderQuestion();renderAll();renderShop();
  $('chamberRewardModal').classList.add('show');
