@@ -148,7 +148,7 @@ const ZEROID_ITEMS=[
   {id:'quill',icon:'🖋️',name:'Quill of Exchange',cost:4,desc:'Add one question-exchange use.'},
   {id:'totem',icon:'🪙',name:'Totem of Undying',cost:5,desc:'Revive once with 1 heart.'},
   {id:'enchanted',icon:'💛',name:'Enchanted Totem',cost:6,desc:'Gain 2 golden hearts for 20 question rounds.'},
-  {id:'amulet',icon:'🧿',name:'Amulet of Colossus',cost:3,desc:'Turn this level into a bonus challenge. Answer correctly for a bonus reward, then continue the level.'}
+  {id:'amulet',icon:'🎖️',name:'Amulet of Colossus',cost:3,desc:'Turn this level into a bonus challenge. Answer correctly for a bonus reward, then continue the level.'}
  ];
 const WANDERING_ITEMS=[
 {id:'enchantedtotem',icon:'💛',name:'Enchanted Totem of Undying',cost:100,desc:'Gain 2 golden hearts for 20 question rounds.'},
@@ -552,11 +552,11 @@ function renderZeroidShop(){
   else if(id==='enchanted'){state.goldenHearts=2;state.goldenRounds=20;state.inventory.push('💛 Enchanted Totem of Undying');showTotemAnimation('enchanted');say('Enchanted Totem purchased! Two golden hearts are active.','good');}
   else if(id==='amulet'){
    state.amuletUsedThisLevel=true;
-   state.inventory.push('🧿 Amulet of Colossus');
+   state.inventory.push('🎖️ Amulet of Colossus');
    if(!state.q)makeQuestion();
    state.q.bonus=true;
    renderQuestion();
-   say('🧿 Amulet of Colossus activated! This level is now a bonus challenge. Answer correctly for a bonus reward, then continue the level.','good');
+   say('🎖️ Amulet of Colossus activated! This level is now a bonus challenge. Answer correctly for a bonus reward, then continue the level.','good');
   }
   renderAll();
  }
