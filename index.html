@@ -406,6 +406,17 @@ function renderScene(){
  $('sceneBadge').textContent=state.level===50?'☠️ FINAL BOSS':state.level%5===0?'👹 BOSS BATTLE':isBonusLevel()?'🎁 BONUS QUESTION':'🧭 EXPLORING';
  $('art').style.background=reg.sky;$('prop1').textContent=reg.props[step];$('prop2').textContent=reg.props[(step+3)%10];$('prop3').textContent=reg.props[(step+6)%10];$('sun').textContent=['🌙','☀️','✨','🌊','🌟'][ix];$('cloud').textContent=['☁️','🌬️','❄️','🫧','☁️'][ix];$('artlabel').textContent=reg.name+' · '+title;
 }
+function makeQuestion(previous=null,bonus=null){
+ const isBonus=bonus===null?!!(previous&&previous.bonus):!!bonus;
+ let idx=Math.floor(Math.random()*NAMES.length),askMeaning=Math.random()<.5;
+ if(previous&&!previous.custom&&idx===previous.idx&&askMeaning===previous.askMeaning)askMeaning=!askMeaning;
+ let pair=NAMES[idx],correct=askMeaning?pair[1]:pair[0];
+ let pool=NAMES.map(n=>askMeaning?n[1]:n[0]).filter(v=>v!==correct);
+ let opts=shuffle([correct,...shuffle(pool).slice(0,3)]);
+ state.hinted=false;
+ state.q={idx:idx,correct:correct,options:opts,askMeaning:askMeaning,bonus:isBonus};
+ renderQuestion();
+}
 function renderQuestion(){
  if(!state.q)makeQuestion();
  $('continue').style.display='none';
