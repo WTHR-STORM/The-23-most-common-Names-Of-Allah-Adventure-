@@ -36,6 +36,26 @@
 .wander-special b{font-size:11px}
 .wander-special small{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin:4px 0 8px}
 .wander-special .buy{width:100%}
+
+.totem-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;opacity:0;visibility:hidden;pointer-events:none;background:radial-gradient(circle at center,#f6d46b35 0, #08111fe8 64%);transition:opacity .22s ease,visibility .22s ease}
+.totem-overlay.show{opacity:1;visibility:visible}
+.totem-card{position:relative;overflow:hidden;width:min(390px,92vw);text-align:center;padding:26px 23px 22px;border:1px solid #ffe39a;border-radius:24px;background:linear-gradient(155deg,#243a57,#121e31);box-shadow:0 0 0 1px #f6d46b22,0 0 55px #ffc95a66,0 26px 80px #000b;transform:translateY(22px) scale(.72);opacity:0}
+.totem-overlay.show .totem-card{animation:totemCardIn 2.7s cubic-bezier(.18,.8,.24,1) both}
+.totem-icon{position:relative;z-index:2;font-size:76px;line-height:1.2;filter:drop-shadow(0 0 16px #ffd36b99);transform-origin:center;display:block}
+.totem-overlay.show .totem-icon{animation:totemCoinSpin .85s cubic-bezier(.2,.8,.2,1) 2,totemGlow 1.4s ease-in-out infinite alternate}
+.totem-rays{position:absolute;inset:-20px;display:grid;place-items:center;color:#ffe7a4;font-size:36px;letter-spacing:17px;opacity:0}
+.totem-overlay.show .totem-rays{animation:totemRays 2.7s ease-out both}
+.totem-kicker{font-size:10px;letter-spacing:.2em;font-weight:1000;color:#ffdf8c;text-transform:uppercase;margin-top:7px}
+.totem-card h2{font-size:23px;margin:5px 0 7px}
+.totem-card p{font-size:13px;color:#d1deef;margin:0}
+.totem-heart-pop{display:inline-block;margin-top:14px;border:1px solid #7c9cbd;border-radius:99px;background:#243e5e;padding:7px 12px;color:#ffe6a1;font-size:11px;font-weight:1000}
+.totem-overlay.show .totem-heart-pop{animation:heartBadgePop .48s ease-out .4s both}
+@keyframes totemCardIn{0%{opacity:0;transform:translateY(26px) scale(.62)}15%{opacity:1;transform:translateY(0) scale(1.06)}24%{transform:translateY(0) scale(1)}78%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-10px) scale(.96)}}
+@keyframes totemCoinSpin{0%{transform:rotateY(0) scale(.55)}50%{transform:rotateY(180deg) scale(1.18)}100%{transform:rotateY(360deg) scale(1)}}
+@keyframes totemGlow{from{filter:drop-shadow(0 0 8px #ffd36b66)}to{filter:drop-shadow(0 0 26px #ffe58c)}}
+@keyframes totemRays{0%{opacity:0;transform:scale(.35) rotate(-30deg)}18%{opacity:.7}65%{opacity:.28;transform:scale(1.45) rotate(18deg)}100%{opacity:0;transform:scale(1.8) rotate(35deg)}}
+@keyframes heartBadgePop{0%{opacity:0;transform:scale(.7)}65%{opacity:1;transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.totem-overlay.show .totem-card,.totem-overlay.show .totem-icon,.totem-overlay.show .totem-rays,.totem-overlay.show .totem-heart-pop{animation:none}.totem-card{opacity:1;transform:none}}
 </style></head><body><div class="wrap">
 <header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>MEANING QUEST</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><button class="button ghost" id="restart">↻ New run</button></header>
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
@@ -53,7 +73,7 @@
 <section class="panel"><div class="panelhead"><div><h3>🧳 Inventory</h3><div class="muted">Loot collected on this run.</div></div></div><div class="sidepad"><div class="inv" id="inventory"><span>Empty so far</span></div><div class="muted" style="margin-top:9px" id="trophies">Boss trophies: 0</div></div></section>
 <section class="panel"><div class="panelhead"><div><h3>🧙 The Trader</h3><div class="muted">A regular trader with useful supplies and fair prices.</div></div><span class="badge">🟢 ALWAYS HERE</span></div><div class="sidepad" id="shopArea"></div></section><section class="panel"><div class="panelhead"><div><h3>🧳 Wandering Trader</h3><div class="muted">Rare enchanted stock. May appear at a new level.</div></div><span class="badge" id="wanderingBadge">TRAVELLING</span></div><div class="sidepad" id="wanderingArea"></div></section>
 </aside></div><div class="footer">Learn at your own pace. Every correct answer brings you one step closer to the final challenge. <br>Meaning Quest • a personal learning adventure</div></div>
-<div class="modal" id="potionChoiceModal"><div class="modalcard"><div class="big">🧪</div><h2>Powerful Potion</h2><p>Choose ONE effect for this run. This choice cannot be undone.</p><div class="potion-choices"><button class="button gold" id="potionHearts">💛 +5 permanent hearts</button><button class="button ghost" id="potionSkip">⏩ Complete 5 levels at once</button></div></div></div><div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="modalRestart">Play again</button></div></div>
+<div class="totem-overlay" id="totemEffect" aria-live="polite" aria-hidden="true"><div class="totem-card"><div class="totem-rays">✦ ✧ ✦</div><span class="totem-icon" id="totemFxIcon">🪙</span><div class="totem-kicker">Resurrection</div><h2 id="totemFxTitle">TOTEM OF UNDYING!</h2><p id="totemFxText">You were revived with 1 heart. Keep going!</p><div class="totem-heart-pop" id="totemFxBadge">❤️ +1 HEART</div></div></div><div class="modal" id="potionChoiceModal"><div class="modalcard"><div class="big">🧪</div><h2>Powerful Potion</h2><p>Choose ONE effect for this run. This choice cannot be undone.</p><div class="potion-choices"><button class="button gold" id="potionHearts">💛 +5 permanent hearts</button><button class="button ghost" id="potionSkip">⏩ Complete 5 levels at once</button></div></div></div><div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="modalRestart">Play again</button></div></div>
 <script>
 (function(){
 'use strict';
@@ -195,6 +215,34 @@ function renderWanderingTrader(){
  if(state.knockbackUses>0)html+='<div class="wander-special"><b>⚔️ Knockback Sword · '+state.knockbackUses+' uses left</b><small>Use it during a boss fight to defeat the boss instantly.</small><button class="buy" data-use-sword '+(state.level%5!==0?'disabled':'')+'>'+(state.level%5===0?'⚔️ Use sword on boss':'Available on boss levels only')+'</button></div>';
  area.innerHTML=html;
 }
+function showTotemAnimation(kind){
+ const overlay=$('totemEffect');
+ const icon=$('totemFxIcon');
+ const title=$('totemFxTitle');
+ const copy=$('totemFxText');
+ const badge=$('totemFxBadge');
+ if(overlay._hideTimer)clearTimeout(overlay._hideTimer);
+ if(kind==='enchanted'){
+  icon.textContent='💛';
+  title.textContent='ENCHANTED TOTEM ACTIVATED!';
+  copy.textContent='Two golden hearts are ready to protect you.';
+  badge.textContent='💛 2 GOLDEN HEARTS · 20 ROUNDS';
+ }else{
+  icon.textContent='🪙';
+  title.textContent='TOTEM OF UNDYING!';
+  copy.textContent='You have been revived with 1 heart. Keep going!';
+  badge.textContent='❤️ +1 HEART';
+ }
+ overlay.classList.remove('show');
+ overlay.setAttribute('aria-hidden','false');
+ void overlay.offsetWidth;
+ overlay.classList.add('show');
+ overlay._hideTimer=setTimeout(()=>{
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  overlay._hideTimer=null;
+ },2800);
+}
 function tickGoldenRound(){
  if(state.goldenRounds<=0)return;
  state.goldenRounds--;
@@ -221,6 +269,7 @@ function buyWandering(id){
   state.goldenRounds=20;
   state.inventory.push('💛 Enchanted Totem of Undying');
   say('Enchanted Totem activated! Two golden hearts act like normal hearts and expire after 20 question rounds if unused.','good');
+  showTotemAnimation('enchanted');
  }else if(id==='knockback'){
   state.knockbackUses=2;
   state.inventory.push('⚔️ Knockback Sword · 2 uses');
@@ -289,7 +338,17 @@ function makeQuestion(){let idx=(state.level*3+Math.floor(Math.random()*NAMES.le
 function renderQuestion(){if(!state.q)makeQuestion();$('continue').style.display='none';let q=state.q,pair=NAMES[q.idx];$('question').textContent=q.askMeaning?'What does '+pair[0]+' mean?':'Which Name means “'+pair[1]+'”?';$('note').textContent='Question '+Math.min(23,((state.level-1)%23)+1)+' of the Names revision set. Choose 1 of 4 answers.';$('qkicker').textContent=state.level%5===0?'Boss battle · Knowledge strike':'Knowledge quest';$('answers').innerHTML=q.options.map((op,i)=>'<button class="answer" data-answer="'+encodeURIComponent(op)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+op+'</span></button>').join('');$('answers').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>answer(decodeURIComponent(b.dataset.answer),b)));renderBoss();}
 function renderBoss(){let box=$('bossPanel');if(state.level%5!==0){box.innerHTML='';return;}let hearts='';for(let i=0;i<state.bossMax;i++)hearts+='<span class="bossheart '+(i>=state.bossHp?'lost':'')+'">'+(i<state.bossHp?'♥':'×')+'</span>';box.innerHTML='<div class="bossbox"><div class="bosstop"><span>'+(state.level===50?'☠️ THE DESTRUCTED':'👹 Level '+state.level+' Boss')+'</span><span>'+state.bossHp+' / '+state.bossMax+' HP</span></div><div class="bosshearts">'+hearts+'</div></div>';}
 function awardBoss(){state.trophies.push('🏆 Boss trophy · Lv '+state.level);state.bossesDefeated++;updateQuests('boss');let missing=SPECIAL.filter(s=>!state[s.id]);if(missing.length){let got=missing[Math.floor(Math.random()*missing.length)];state[got.id]=true;say('Boss defeated! You earned '+got.name+' — '+got.desc,'good');}else{say('Boss defeated! Another trophy added to your collection.','good');}}
-function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(state.level%5===0){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{say('Correct! '+NAMES.find(n=>n[0]===op||n[1]===op)[0]+' — '+NAMES.find(n=>n[0]===op||n[1]===op)[1]+'. +'+points+' XP, +'+gain+' coins.','good');}renderAll();if(state.level%5!==0){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(state.totem&&!state.revived){state.revived=true;state.totem=false;state.hearts=1;say('Totem of Undying activated! You have been revived with 1 heart.','good');renderAll();}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
+function activateTotemRevive(){
+ if(!state.totem||state.revived)return false;
+ state.revived=true;
+ state.totem=false;
+ state.hearts=1;
+ say('Totem of Undying activated! You have been revived with 1 heart.','good');
+ renderAll();
+ showTotemAnimation('revive');
+ return true;
+}
+function answer(op,btn){if(state.locked)return;state.locked=true;let correct=op===state.q.correct;document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;let val=decodeURIComponent(b.dataset.answer);if(val===state.q.correct)b.classList.add('correct');if(val===op&&!correct)b.classList.add('wrong');});if(correct){state.streak++;let points=state.memory?20:10;if(state.elixir>0){points+=5;state.elixir--;}state.xp+=points;state.correctAnswers++;let gain=state.lucky>0?18:8;state.coins+=gain;state.lucky=0;updateQuests('correct',points);tickGoldenRound();if(state.level%5===0){state.bossHp=Math.max(0,state.bossHp-1);renderBoss();if(state.bossHp===0){awardBoss();advanceLevel(true);return;}say('Direct hit! The boss has '+state.bossHp+' HP left. +'+points+' XP, +'+gain+' coins.','good');}else{say('Correct! '+NAMES.find(n=>n[0]===op||n[1]===op)[0]+' — '+NAMES.find(n=>n[0]===op||n[1]===op)[1]+'. +'+points+' XP, +'+gain+' coins.','good');}renderAll();if(state.level%5!==0){advanceLevel(false);return;}state.locked=false;setTimeout(()=>{if(!state.locked){state.q=null;makeQuestion();}},850);}else{if(state.shield>0){state.shield--;state.streak=0;say('Wrong answer, but your Guardian Shield blocked the heart loss. Your streak reset, but your heart is safe.','bad');}else if(state.goldenHearts>0){state.goldenHearts--;if(state.streakGuard>0){state.streakGuard--;say('A golden heart absorbed the hit, and Cold Flame kept your streak safe!','good');}else{state.streak=0;say('A golden heart absorbed the hit! Your normal hearts are safe.','good');}}else{state.hearts--;if(state.streakGuard>0){state.streakGuard--;say('Wrong answer. Cold Flame kept your streak safe. Try again!','bad');}else{state.streak=0;say('Not quite! You lost a heart. Try again — every mistake is a chance to learn.','bad');}}tickGoldenRound();updateQuests('wrong');renderAll();if(state.hearts<=0){if(state.crystal&&!state.crystalUsed){state.crystalUsed=true;state.hearts=1;say('Crystal Heart activated! You have been revived with 1 heart.','good');renderAll();}else if(activateTotemRevive()){}else{endGame(false);return;}}const oldMsg=$('msg').textContent;$('continue').style.display='inline-flex';$('msg').textContent=oldMsg+' Click Continue when you are ready for the next question.';}}
 function advanceLevel(fromBoss){state.cleared=Math.max(state.cleared,state.level);updateQuests('level');state.level++;state.q=null;if(state.level>50){endGame(true);return;}state.shopOpen=true;startLevel();if(fromBoss&&state.trophies.length)renderRelics();}
 function renderAll(){renderHud();renderRelics();renderBoss();renderShop();renderQuests();renderWanderingTrader();}
 function showHint(){if(!state.q)return;let correct=state.q.correct;let b=[...document.querySelectorAll('.answer')];let wrong=b.filter(x=>decodeURIComponent(x.dataset.answer)!==correct);shuffle(wrong).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.25';});$('hintline').textContent='Hint: '+(state.q.askMeaning?'The correct meaning begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”':'The correct Name begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”');state.hinted=true;}
