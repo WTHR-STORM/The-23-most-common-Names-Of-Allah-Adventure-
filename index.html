@@ -115,7 +115,7 @@ body.golden-trials-mode{background:radial-gradient(ellipse at 20% 0%,#a98414 0,t
 </style></head><body><section id="titleScreen" class="title-screen"><div class="title-card"><div class="title-logo">🧭✨</div><div class="title-kicker">Learn • Explore • Remember</div><h1>The 23 Names Of Allah Adventure</h1><p>Explore five magical regions, answer questions, beat boss battles, earn rare rewards, and learn the beautiful meanings of the Names of Allah.</p><div class="title-actions"><button class="button gold" id="playButton">▶ Play</button><button class="button ghost" id="tutorialButton">📘 Tutorial</button><button class="button ghost" id="titleTipsButton">ⓘ Tips & Secrets</button></div><div class="title-stats"><span>🗺️ 50 Levels</span><span>👹 Boss Battles</span><span>🎁 Bonus Rewards</span><span>📚 23 Names</span></div><p style="margin:20px auto 0;font-size:10px">Your adventure begins with knowledge.</p></div></section><div class="wrap" id="gameWrap" style="display:none">
 <header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>The 23 Names Of Allah Adventure</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><div class="top-actions"><button class="button gold" id="exitGoldenTrials" style="display:none">↩ Exit Golden Trials</button><button class="button ghost" id="tipsOpen">ⓘ Tips & Secrets</button><button class="button ghost" id="restart">↻ New run</button></div></header>
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
-<section class="panel" id="goldenTrialsUnlockPanel" style="display:none"><div class="panelhead"><div><h2>✨ A New Challenge Awaits</h2><div class="muted">You freed the Secret Chambers and cleared level 25. Enter a 25-stage boss gauntlet with special quests and flat shop prices.</div></div><button class="button gold" id="enterGoldenTrials">✨ Enter Golden Trials</button></div></section>
+<section class="panel" id="goldenTrialsUnlockPanel" style="display:block"><div class="panelhead"><div><h2>✨ Golden Trials</h2><div class="muted">Take on a 25-stage boss gauntlet with special quests and flat shop prices. Available from the start — your main adventure progress is saved.</div></div><button class="button gold" id="enterGoldenTrials">✨ Enter Golden Trials</button></div></section>
 <section class="panel quest-board">
 <div class="panelhead quest-head"><div><h2 id="questBoardTitle">📜 Quest Bar</h2><div class="muted" id="questBoardDesc">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><span class="shard-count" id="zeroidCount">🟣 Zeroid Coins: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button><button class="tip-button" data-tip="currency">ⓘ Currency tips</button></div></div>
 <div class="quest-grid" id="questCards"></div>
@@ -686,8 +686,8 @@ function restoreAdventureSnapshot(saved){
 function renderGoldenTrialsEntry(){
  const panel=$('goldenTrialsUnlockPanel');
  if(!panel)return;
- const unlocked=(state.goldenTrialsCodeUnlocked||(state.chambersCompleted&&state.cleared>=25))&&!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
- panel.style.display=unlocked?'block':'none';
+ const available=!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
+ panel.style.display=available?'block':'none';
  const button=$('enterGoldenTrials');
  if(button)button.textContent=state.goldenTrialProgress?'↻ Resume Golden Trials · Stage '+state.goldenTrialProgress.floor:'✨ Enter Golden Trials';
  const exit=$('exitGoldenTrials');
@@ -695,7 +695,7 @@ function renderGoldenTrialsEntry(){
 }
 function enterGoldenTrials(){
  if(state.locked){say('Finish the current question before entering the Golden Trials.','bad');return;}
- if((!state.goldenTrialsCodeUnlocked&&(!state.chambersCompleted||state.cleared<25))||state.goldenTrialsCompleted){say('Enter code 12223, or free the Secret Chambers and clear level 25, to unlock the Golden Trials.','bad');return;}
+ if(state.goldenTrialsCompleted){say('You have already completed the Golden Trials and earned the Champion title.','bad');return;}
  state.goldenTrialSavedState=captureAdventureSnapshot();
  state.goldenTrialsMode=true;
  document.body.classList.add('golden-trials-mode');
