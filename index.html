@@ -108,7 +108,7 @@ body.golden-trials-mode{background:radial-gradient(ellipse at 20% 0%,#a98414 0,t
 .zeroid-balance{font-size:11px;font-weight:900;color:#e5d2ff}
 @media(max-width:620px){.title-card{padding:24px 17px}.title-logo{font-size:52px}.title-actions{display:grid}.title-actions .button{width:100%}.choice-grid{grid-template-columns:1fr}.top-actions{justify-content:flex-end}.top-actions .button{font-size:10px;padding:8px}}
 </style></head><body><section id="titleScreen" class="title-screen"><div class="title-card"><div class="title-logo">🧭✨</div><div class="title-kicker">Learn • Explore • Remember</div><h1>The 23 Names Of Allah Adventure</h1><p>Explore five magical regions, answer questions, beat boss battles, earn rare rewards, and learn the beautiful meanings of the Names of Allah.</p><div class="title-actions"><button class="button gold" id="playButton">▶ Play</button><button class="button ghost" id="tutorialButton">📘 Tutorial</button><button class="button ghost" id="titleTipsButton">ⓘ Tips & Secrets</button></div><div class="title-stats"><span>🗺️ 50 Levels</span><span>👹 Boss Battles</span><span>🎁 Bonus Rewards</span><span>📚 23 Names</span></div><p style="margin:20px auto 0;font-size:10px">Your adventure begins with knowledge.</p></div></section><div class="wrap" id="gameWrap" style="display:none">
-<header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>The 23 Names Of Allah Adventure</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><div class="top-actions"><button class="button ghost" id="tipsOpen">ⓘ Tips & Secrets</button><button class="button ghost" id="restart">↻ New run</button></div></header>
+<header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>The 23 Names Of Allah Adventure</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><div class="top-actions"><button class="button gold" id="exitGoldenTrials" style="display:none">↩ Exit Golden Trials</button><button class="button ghost" id="tipsOpen">ⓘ Tips & Secrets</button><button class="button ghost" id="restart">↻ New run</button></div></header>
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
 <section class="panel quest-board">
 <div class="panelhead quest-head"><div><h2 id="questBoardTitle">📜 Quest Bar</h2><div class="muted" id="questBoardDesc">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><span class="shard-count" id="zeroidCount">🟣 Zeroid Coins: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button><button class="tip-button" data-tip="currency">ⓘ Currency tips</button></div></div>
@@ -328,7 +328,7 @@ function grantBonusReward(){
   }
   return 'Bonus reward';
 }
-function fresh(){document.body.classList.remove('chambers-mode','golden-trials-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialsCompleted:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function fresh(){document.body.classList.remove('chambers-mode','golden-trials-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialProgress:null,goldenTrialsCompleted:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function rollShopStock(){
@@ -645,18 +645,15 @@ function renderZeroidShop(){
 function showHint(){if(!state.q)return;if(state.locked){say('Finish the current answer before using a hint.','bad');return;}if(state.hinted){say('You have already used a hint on this question.','bad');return;}if(state.hintUses<=0){say('No hints left. Buy a Hint Scroll from the Trader for 30 coins.','bad');return;}let correct=state.q.correct;let b=[...document.querySelectorAll('.answer')];let wrong=b.filter(x=>decodeURIComponent(x.dataset.answer)!==correct);shuffle(wrong).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.25';});$('hintline').textContent='Hint: '+(state.q.askMeaning?'The correct meaning begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”':'The correct Name begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”');state.hintUses--;state.hinted=true;renderRelics();say('Hint used! '+state.hintUses+' hint(s) remaining.','good');}
 function buy(id){let it=ITEMS.find(x=>x.id===id);if(!it)return;if(state.regularOutOfStock.includes(id)){say('That item is out of stock until the next level.','bad');return;}let cost=state.goldenTrialsMode?10:(state.key?Math.ceil(it.cost/2):it.cost);if(state.coins<cost)return;let msg=it.buy();if(msg==='Your hearts are already full.'||msg==='Your Totem has already been purchased or used.') {say(msg,'bad');return;}state.coins-=cost;if(it.id!=='hintscroll'&&!state.inventory.includes(it.icon+' '+it.name))state.inventory.push(it.icon+' '+it.name);say(msg,'good');renderAll();}
 function endGame(win){state.locked=true;$('modalIcon').textContent=win?'🏆':'💔';$('modalTitle').textContent=win?'The Quest Is Complete!':'Game Over';$('modalText').textContent=win?'You defeated THE DESTRUCTED and cleared all 50 levels! Final score: '+state.xp+' XP and '+state.coins+' coins.':'You reached level '+state.level+' and earned '+state.xp+' XP. Start a new run and try again!';$('modal').classList.add('show');}
-function renderGoldenTrialsEntry(){
- const panel=$('goldenTrialsUnlockPanel');
- if(!panel)return;
- const unlocked=state.chambersCompleted&&state.cleared>=25&&!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
- panel.style.display=unlocked?'block':'none';
+function copyGoldenQuestion(q){
+ return q?{...q,options:Array.isArray(q.options)?q.options.slice():[]}:null;
 }
-function enterGoldenTrials(){
- if(state.locked){say('Finish the current question before entering the Golden Trials.','bad');return;}
- if(!state.chambersCompleted||state.cleared<25||state.goldenTrialsCompleted){say('Free the Secret Chambers and clear level 25 to unlock the Golden Trials.','bad');return;}
- state.goldenTrialSavedState={
-  level:state.level,
-  q:state.q?{...state.q,options:state.q.options.slice()}:null,
+function cloneQuestList(quests){
+ return (quests||[]).map(q=>({...q,reward:{...q.reward}}));
+}
+function captureAdventureSnapshot(){
+ return {
+  level:state.level,q:copyGoldenQuestion(state.q),
   bossHp:state.bossHp,bossMax:state.bossMax,hinted:state.hinted,
   wanderingTraderHere:state.wanderingTraderHere,shopOpen:state.shopOpen,
   regularOutOfStock:state.regularOutOfStock.slice(),
@@ -664,37 +661,89 @@ function enterGoldenTrials(){
   zeroidOutOfStock:state.zeroidOutOfStock.slice(),
   amuletUsedThisLevel:state.amuletUsedThisLevel,
   levelsSinceWanderer:state.levelsSinceWanderer,
-  quests:state.quests.map(q=>({...q,reward:{...q.reward}})),
-  questSerial:state.questSerial
+  quests:cloneQuestList(state.quests),questSerial:state.questSerial
  };
+}
+function restoreAdventureSnapshot(saved){
+ if(!saved)return;
+ state.level=saved.level;state.q=copyGoldenQuestion(saved.q);
+ state.bossHp=saved.bossHp;state.bossMax=saved.bossMax;state.hinted=!!saved.hinted;
+ state.wanderingTraderHere=!!saved.wanderingTraderHere;state.shopOpen=saved.shopOpen!==false;
+ state.regularOutOfStock=(saved.regularOutOfStock||[]).slice();
+ state.wanderingOutOfStock=(saved.wanderingOutOfStock||[]).slice();
+ state.zeroidOutOfStock=(saved.zeroidOutOfStock||[]).slice();
+ state.amuletUsedThisLevel=!!saved.amuletUsedThisLevel;
+ state.levelsSinceWanderer=saved.levelsSinceWanderer||0;
+ state.quests=cloneQuestList(saved.quests);
+ state.questSerial=saved.questSerial||0;
+}
+function renderGoldenTrialsEntry(){
+ const panel=$('goldenTrialsUnlockPanel');
+ if(!panel)return;
+ const unlocked=state.chambersCompleted&&state.cleared>=25&&!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
+ panel.style.display=unlocked?'block':'none';
+ const button=$('enterGoldenTrials');
+ if(button)button.textContent=state.goldenTrialProgress?'↻ Resume Golden Trials · Stage '+state.goldenTrialProgress.floor:'✨ Enter Golden Trials';
+ const exit=$('exitGoldenTrials');
+ if(exit)exit.style.display=state.goldenTrialsMode?'inline-flex':'none';
+}
+function enterGoldenTrials(){
+ if(state.locked){say('Finish the current question before entering the Golden Trials.','bad');return;}
+ if(!state.chambersCompleted||state.cleared<25||state.goldenTrialsCompleted){say('Free the Secret Chambers and clear level 25 to unlock the Golden Trials.','bad');return;}
+ state.goldenTrialSavedState=captureAdventureSnapshot();
  state.goldenTrialsMode=true;
  document.body.classList.add('golden-trials-mode');
- state.goldenTrialFloor=1;state.level=1;state.q=null;state.locked=false;state.hinted=false;state.wanderingTraderHere=false;
- state.quests=[];state.questSerial=0;state.quests=[generateQuest(),generateQuest(),generateQuest()];
- startLevel();
- say('✨ GOLDEN TRIALS BEGUN! Defeat 25 bosses. Every shop item costs 10 coins, and Golden Trials have their own quests.','good');
+ if(state.goldenTrialProgress){
+  const saved=state.goldenTrialProgress;
+  state.goldenTrialFloor=saved.floor;
+  state.level=saved.floor;
+  state.q=copyGoldenQuestion(saved.q);
+  state.bossHp=saved.bossHp;state.bossMax=saved.bossMax;state.hinted=!!saved.hinted;
+  state.regularOutOfStock=(saved.regularOutOfStock||[]).slice();
+  state.wanderingOutOfStock=(saved.wanderingOutOfStock||[]).slice();
+  state.zeroidOutOfStock=(saved.zeroidOutOfStock||[]).slice();
+  state.amuletUsedThisLevel=!!saved.amuletUsedThisLevel;
+  state.wanderingTraderHere=false;state.shopOpen=true;
+  state.quests=cloneQuestList(saved.quests);state.questSerial=saved.questSerial||0;
+  state.goldenTrialProgress=null;
+  state.locked=false;
+  renderScene();renderQuestion();renderAll();renderShop();
+  say('✨ Welcome back! Resumed Golden Trial '+state.goldenTrialFloor+' of 25.','good');
+ }else{
+  state.goldenTrialFloor=1;state.level=1;state.q=null;state.locked=false;state.hinted=false;state.wanderingTraderHere=false;
+  state.quests=[];state.questSerial=0;state.quests=[generateQuest(),generateQuest(),generateQuest()];
+  startLevel();
+  say('✨ GOLDEN TRIALS BEGUN! Defeat 25 bosses. Every shop item costs 10 coins, and Golden Trials have their own quests.','good');
+ }
  renderAll();
+}
+function exitGoldenTrials(){
+ if(!state.goldenTrialsMode)return;
+ if(state.locked){say('Finish this question or press Continue before exiting Golden Trials.','bad');return;}
+ state.goldenTrialProgress={
+  floor:state.goldenTrialFloor,q:copyGoldenQuestion(state.q),
+  bossHp:state.bossHp,bossMax:state.bossMax,hinted:state.hinted,
+  regularOutOfStock:state.regularOutOfStock.slice(),
+  wanderingOutOfStock:state.wanderingOutOfStock.slice(),
+  zeroidOutOfStock:state.zeroidOutOfStock.slice(),
+  amuletUsedThisLevel:state.amuletUsedThisLevel,
+  quests:cloneQuestList(state.quests),questSerial:state.questSerial
+ };
+ const saved=state.goldenTrialSavedState;
+ state.goldenTrialsMode=false;document.body.classList.remove('golden-trials-mode');
+ state.goldenTrialFloor=0;state.goldenTrialSavedState=null;
+ restoreAdventureSnapshot(saved);
+ state.locked=false;
+ renderScene();renderQuestion();renderAll();renderShop();
+ say('Golden Trials paused. Your stage and Golden Trials quests are saved — you can re-enter any time.','good');
 }
 function finishGoldenTrials(){
  const saved=state.goldenTrialSavedState;
- state.goldenTrialsMode=false;
- document.body.classList.remove('golden-trials-mode');
- state.goldenTrialFloor=0;state.goldenTrialSavedState=null;state.goldenTrialsCompleted=true;
+ state.goldenTrialsMode=false;document.body.classList.remove('golden-trials-mode');
+ state.goldenTrialFloor=0;state.goldenTrialSavedState=null;state.goldenTrialProgress=null;state.goldenTrialsCompleted=true;
  if(!state.titles.includes('Golden Trials Champion'))state.titles.push('Golden Trials Champion');
- if(saved){
-  state.level=saved.level;
-  state.q=saved.q;
-  state.bossHp=saved.bossHp;state.bossMax=saved.bossMax;state.hinted=saved.hinted;
-  state.wanderingTraderHere=saved.wanderingTraderHere;state.shopOpen=saved.shopOpen;
-  state.regularOutOfStock=saved.regularOutOfStock||[];
-  state.wanderingOutOfStock=saved.wanderingOutOfStock||[];
-  state.zeroidOutOfStock=saved.zeroidOutOfStock||[];
-  state.amuletUsedThisLevel=!!saved.amuletUsedThisLevel;
-  state.levelsSinceWanderer=saved.levelsSinceWanderer||0;
-  state.quests=saved.quests||[];
-  state.questSerial=saved.questSerial||0;
- }
- state.locked=false;state.hinted=false;
+ restoreAdventureSnapshot(saved);
+ state.locked=false;
  renderScene();renderQuestion();renderAll();renderShop();
  $('goldenTrialsRewardModal').classList.add('show');
  say('🏆 GOLDEN TRIALS COMPLETE! You beat all 25 stages and earned the Golden Trials Champion title.','good');
@@ -754,7 +803,7 @@ function restart(){fresh();$('modal').classList.remove('show');startLevel();}
 $('answers').addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b&&!b.disabled)answer(decodeURIComponent(b.dataset.answer),b);});
 $('shopArea').addEventListener('click',e=>{let b=e.target.closest('[data-buy]');if(b)buy(b.dataset.buy);});$('zeroidShopArea').addEventListener('click',e=>{let b=e.target.closest('[data-zeroid-buy]');if(b)buyZeroid(b.dataset.zeroidBuy);});$('wanderingArea').addEventListener('click',e=>{let b=e.target.closest('[data-wanderbuy]');if(b)buyWandering(b.dataset.wanderbuy);let sword=e.target.closest('[data-use-sword]');if(sword)useKnockbackSword();});$('potionHearts').addEventListener('click',choosePotionHearts);$('potionSkip').addEventListener('click',skipFiveLevels);
 $('continue').addEventListener('click',()=>{if(!state.locked)return;const wasBonus=!!(state.q&&state.q.bonus);state.locked=false;state.q=null;$('continue').style.display='none';makeQuestion();say(wasBonus?'Bonus question missed — no bonus reward this time. The regular level question comes next.':'Next question — you’ve got this!','good');});$('hint').addEventListener('click',showHint);$('questCards').addEventListener('click',e=>{let b=e.target.closest('[data-claimquest]');if(b)claimQuest(Number(b.dataset.claimquest));});$('useShard').addEventListener('click',redeemMaximusShard);
-$('enterGoldenTrials').addEventListener('click',enterGoldenTrials);$('goldenTrialsRewardClose').addEventListener('click',()=>$('goldenTrialsRewardModal').classList.remove('show'));$('playButton').addEventListener('click',playGame);$('tutorialButton').addEventListener('click',openTutorial);$('titleTipsButton').addEventListener('click',()=>openHelp('all'));$('tipsOpen').addEventListener('click',()=>openHelp('all'));document.querySelectorAll('[data-tip]').forEach(b=>b.addEventListener('click',()=>openHelp(b.dataset.tip)));$('tutorialTips').addEventListener('click',()=>{ $('tutorialModal').classList.remove('show');openHelp('all');});$('tutorialClose').addEventListener('click',()=>{$('tutorialModal').classList.remove('show');playGame();});$('helpClose').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('chamberRewardQuill').addEventListener('click',()=>chooseChamberReward('quill'));$('chamberRewardZeroid').addEventListener('click',()=>chooseChamberReward('zeroid'));$('secretCodeLink').addEventListener('click',e=>{e.preventDefault();openSecretCode();});$('secretCodeForm').addEventListener('submit',e=>{e.preventDefault();submitSecretCode();});$('secretCodeCancel').addEventListener('click',exitSecretCodeModal);$('quillButton').addEventListener('click',openQuillExchange);$('quillExchange').addEventListener('click',exchangeQuillQuestion);$('quillCancel').addEventListener('click',()=>$('quillModal').classList.remove('show'));$('restart').addEventListener('click',restart);$('modalRestart').addEventListener('click',restart);
+$('enterGoldenTrials').addEventListener('click',enterGoldenTrials);$('exitGoldenTrials').addEventListener('click',exitGoldenTrials);$('goldenTrialsRewardClose').addEventListener('click',()=>$('goldenTrialsRewardModal').classList.remove('show'));$('playButton').addEventListener('click',playGame);$('tutorialButton').addEventListener('click',openTutorial);$('titleTipsButton').addEventListener('click',()=>openHelp('all'));$('tipsOpen').addEventListener('click',()=>openHelp('all'));document.querySelectorAll('[data-tip]').forEach(b=>b.addEventListener('click',()=>openHelp(b.dataset.tip)));$('tutorialTips').addEventListener('click',()=>{ $('tutorialModal').classList.remove('show');openHelp('all');});$('tutorialClose').addEventListener('click',()=>{$('tutorialModal').classList.remove('show');playGame();});$('helpClose').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('chamberRewardQuill').addEventListener('click',()=>chooseChamberReward('quill'));$('chamberRewardZeroid').addEventListener('click',()=>chooseChamberReward('zeroid'));$('secretCodeLink').addEventListener('click',e=>{e.preventDefault();openSecretCode();});$('secretCodeForm').addEventListener('submit',e=>{e.preventDefault();submitSecretCode();});$('secretCodeCancel').addEventListener('click',exitSecretCodeModal);$('quillButton').addEventListener('click',openQuillExchange);$('quillExchange').addEventListener('click',exchangeQuillQuestion);$('quillCancel').addEventListener('click',()=>$('quillModal').classList.remove('show'));$('restart').addEventListener('click',restart);$('modalRestart').addEventListener('click',restart);
 fresh();renderNamesReference();startLevel();
 })();
 </script></body></html>
