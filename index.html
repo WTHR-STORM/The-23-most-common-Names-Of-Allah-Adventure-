@@ -328,7 +328,7 @@ function grantBonusReward(){
   }
   return 'Bonus reward';
 }
-function fresh(){document.body.classList.remove('chambers-mode','golden-trials-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialProgress:null,goldenTrialsCompleted:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function fresh(){document.body.classList.remove('chambers-mode','golden-trials-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialProgress:null,goldenTrialsCompleted:false,goldenTrialsCodeUnlocked:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function rollShopStock(){
@@ -680,7 +680,7 @@ function restoreAdventureSnapshot(saved){
 function renderGoldenTrialsEntry(){
  const panel=$('goldenTrialsUnlockPanel');
  if(!panel)return;
- const unlocked=state.chambersCompleted&&state.cleared>=25&&!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
+ const unlocked=(state.goldenTrialsCodeUnlocked||(state.chambersCompleted&&state.cleared>=25))&&!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
  panel.style.display=unlocked?'block':'none';
  const button=$('enterGoldenTrials');
  if(button)button.textContent=state.goldenTrialProgress?'↻ Resume Golden Trials · Stage '+state.goldenTrialProgress.floor:'✨ Enter Golden Trials';
@@ -689,7 +689,7 @@ function renderGoldenTrialsEntry(){
 }
 function enterGoldenTrials(){
  if(state.locked){say('Finish the current question before entering the Golden Trials.','bad');return;}
- if(!state.chambersCompleted||state.cleared<25||state.goldenTrialsCompleted){say('Free the Secret Chambers and clear level 25 to unlock the Golden Trials.','bad');return;}
+ if((!state.goldenTrialsCodeUnlocked&&(!state.chambersCompleted||state.cleared<25))||state.goldenTrialsCompleted){say('Enter code 12223, or free the Secret Chambers and clear level 25, to unlock the Golden Trials.','bad');return;}
  state.goldenTrialSavedState=captureAdventureSnapshot();
  state.goldenTrialsMode=true;
  document.body.classList.add('golden-trials-mode');
@@ -756,8 +756,16 @@ function openSecretCode(){
  $('secretCodeModal').classList.add('show');
 }
 function submitSecretCode(){
- if(state.chambersCompleted){$('secretCodeMessage').textContent='The chambers have already been freed this run.';return;}
- if(String($('secretCodeInput').value||'').trim().toLowerCase()!=='secret chambers'){
+ const code=String($('secretCodeInput').value||'').trim().toLowerCase();
+ if(code==='12223'){
+  state.goldenTrialsCodeUnlocked=true;
+  $('secretCodeModal').classList.remove('show');
+  renderGoldenTrialsEntry();
+  say('✨ GOLDEN TRIALS REVEALED! The Enter Golden Trials button is now available.','good');
+  return;
+ }
+ if(state.chambersCompleted){$('secretCodeMessage').textContent='The chambers have already been freed this run. Enter 12223 to reveal the Golden Trials button.';return;}
+ if(code!=='secret chambers'){
   $('secretCodeMessage').textContent='Code not recognized. Try again.';
   return;
  }
