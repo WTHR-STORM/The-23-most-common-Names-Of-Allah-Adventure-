@@ -123,7 +123,7 @@ body.second-isle-mode{background:radial-gradient(ellipse at 18% 5%,#26365f 0,tra
 <header class="top"><div class="brand"><div class="logo">🧭</div><div><div class="eyebrow">Adventure learning game</div><h1>The 23 Names Of Allah Adventure</h1><div class="subtitle">50 levels • 5 regions • Boss battles • The 23 Names of Allah</div></div></div><div class="top-actions"><button class="button gold" id="exitGoldenTrials" style="display:none">↩ Exit Golden Trials</button><button class="button gold" id="exitSecondIsle" style="display:none">↩ Exit Second Isle</button><button class="button ghost" id="tipsOpen">ⓘ Tips & Secrets</button><button class="button ghost" id="restart">↻ New run</button></div></header>
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
 <section class="panel" id="goldenTrialsUnlockPanel" style="display:block"><div class="panelhead"><div><h2>✨ Golden Trials</h2><div class="muted">Take on a 25-stage boss gauntlet with special quests and flat shop prices. Available from the start — your main adventure progress is saved.</div></div><button class="button gold" id="enterGoldenTrials">✨ Enter Golden Trials</button></div></section>
-<section class="panel" id="secondIsleUnlockPanel" style="display:none"><div class="panelhead"><div><h2>🌌 The Second Isle</h2><div class="muted">A separate 50-level adventure across five new regions. Regular bosses have 5 hearts; the final Corrupted Entity Of Doom has 20 hearts and 4 black glitch hearts. Unlocked after defeating THE DESTRUCTED.</div></div><button class="button gold" id="enterSecondIsle">🌌 Enter Second Isle</button></div></section>
+<section class="panel" id="secondIsleUnlockPanel" style="display:none"><div class="panelhead"><div><h2>🌌 The Second Isle</h2><div class="muted">A separate 50-level adventure across five new regions. Regular bosses have 5 hearts; the final Corrupted Entity Of Doom has 20 hearts and 4 black glitch hearts.</div></div><button class="button gold" id="enterSecondIsle">🌌 Enter Second Isle</button></div></section>
 <section class="panel quest-board">
 <div class="panelhead quest-head"><div><h2 id="questBoardTitle">📜 Quest Bar</h2><div class="muted" id="questBoardDesc">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><span class="shard-count" id="zeroidCount">🟣 Zeroid Coins: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button><button class="tip-button" data-tip="currency">ⓘ Currency tips</button></div></div>
 <div class="quest-grid" id="questCards"></div>
@@ -839,7 +839,7 @@ function restoreAdventureSnapshot(saved){
 function renderGoldenTrialsEntry(){
  const panel=$('goldenTrialsUnlockPanel');
  if(!panel)return;
- const available=!state.goldenTrialsMode&&!state.goldenTrialsCompleted;
+ const available=!state.goldenTrialsMode&&!state.secondIsleMode&&!state.chamberMode&&!state.goldenTrialsCompleted;
  panel.style.display=available?'block':'none';
  const button=$('enterGoldenTrials');
  if(button)button.textContent=state.goldenTrialProgress?'↻ Resume Golden Trials · Stage '+state.goldenTrialProgress.floor:'✨ Enter Golden Trials';
@@ -912,7 +912,7 @@ function finishGoldenTrials(){
 function renderSecondIsleEntry(){
  const panel=$('secondIsleUnlockPanel');
  if(!panel)return;
- const available=!!state.secondIsleUnlocked&&!state.secondIsleMode;
+ const available=!!state.secondIsleUnlocked&&!state.secondIsleMode&&!state.goldenTrialsMode&&!state.chamberMode;
  panel.style.display=available?'block':'none';
  const button=$('enterSecondIsle');
  if(button){
