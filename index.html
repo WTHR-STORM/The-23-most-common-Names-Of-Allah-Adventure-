@@ -5,6 +5,15 @@
 body.chambers-mode{background:radial-gradient(ellipse at 20% 0%,#8a1520 0,transparent 36%),radial-gradient(ellipse at 100% 8%,#5b0713 0,transparent 30%),#24060b}
 body.golden-trials-mode{background:radial-gradient(ellipse at 20% 0%,#a98414 0,transparent 36%),radial-gradient(ellipse at 100% 8%,#80620c 0,transparent 30%),#302304}
 body.second-isle-mode{background:radial-gradient(ellipse at 18% 5%,#26365f 0,transparent 36%),radial-gradient(ellipse at 95% 90%,#4b173c 0,transparent 34%),#080911}
+body.hydra-kingdom-mode{background:radial-gradient(ellipse at 15% 0%,#075778 0,transparent 38%),radial-gradient(ellipse at 90% 90%,#123b6a 0,transparent 32%),#041b2d}
+#hydraFloodOverlay{display:none;position:fixed;inset:0;z-index:16;overflow:hidden;pointer-events:none}
+.hydra-water-fill{position:absolute;left:0;right:0;bottom:0;height:0%;background:linear-gradient(180deg,rgba(90,226,255,.14),rgba(34,177,232,.22) 35%,rgba(18,111,191,.31));backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);transition:height .16s linear;overflow:visible}
+.hydra-water-fill:before{content:"";position:absolute;left:-10%;right:-10%;top:-12px;height:24px;background:repeating-radial-gradient(ellipse at 50% 100%,rgba(147,245,255,.42) 0 16px,rgba(54,183,235,.12) 17px 34px,transparent 35px 54px);animation:hydraWaves 3s linear infinite}
+.hydra-water-fill:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 38px,rgba(224,252,255,.045) 39px 42px,transparent 43px 78px)}
+@keyframes hydraWaves{from{transform:translateX(0)}to{transform:translateX(54px)}}
+.hydra-timer{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:2;max-width:calc(100vw - 20px);padding:10px 16px;border:1px solid rgba(133,237,255,.8);border-radius:13px;background:rgba(2,22,39,.78);box-shadow:0 6px 28px rgba(0,0,0,.3);color:#ecfbff;text-align:center;font-size:13px;font-weight:1000;letter-spacing:.07em;white-space:nowrap;text-shadow:0 1px 4px #001}
+.hydra-timer.warning{border-color:#ff9797;color:#fff0f0;background:rgba(66,12,28,.83);animation:hydraWarning 1s ease-in-out infinite alternate}
+@keyframes hydraWarning{from{filter:brightness(1)}to{filter:brightness(1.25)}}
 .bosshearts.glitch-hearts{display:grid;grid-template-columns:repeat(12,minmax(0,1fr))}
 .bossheart.glitch{background:#05050a;border-color:#777084;color:#f0eaff;box-shadow:inset 0 0 8px #000,0 0 5px #8f72bd}
 .bossheart.glitch.lost{opacity:.24;filter:grayscale(1);box-shadow:none}
@@ -124,6 +133,7 @@ body.second-isle-mode{background:radial-gradient(ellipse at 18% 5%,#26365f 0,tra
 <section class="hud"><div class="stat"><div class="staticon">❤️</div><div><strong id="hearts">❤️❤️❤️</strong><small id="heartLabel">HEARTS 3/5</small><small id="goldTimer" class="golden-timer"></small></div></div><div class="stat"><div class="staticon">✨</div><div><strong id="xp">0</strong><small>EXPERIENCE</small></div></div><div class="stat"><div class="staticon">🪙</div><div><strong id="coins">0</strong><small>COINS</small></div></div><div class="stat"><div class="staticon">🔥</div><div><strong id="streak">0</strong><small>ANSWER STREAK</small></div></div></section>
 <section class="panel" id="goldenTrialsUnlockPanel" style="display:block"><div class="panelhead"><div><h2>✨ Golden Trials</h2><div class="muted">Take on a 25-stage boss gauntlet with special quests and flat shop prices. Available from the start — your main adventure progress is saved.</div></div><button class="button gold" id="enterGoldenTrials">✨ Enter Golden Trials</button></div></section>
 <section class="panel" id="secondIsleUnlockPanel" style="display:none"><div class="panelhead"><div><h2>🌌 The Second Isle</h2><div class="muted">A separate 50-level adventure across five new regions. Regular bosses have 5 hearts; the final Corrupted Entity Of Doom has 20 hearts and 4 black glitch hearts.</div></div><button class="button gold" id="enterSecondIsle">🌌 Enter Second Isle</button></div></section>
+<section class="panel" id="hydraChallengePanel"><div class="panelhead"><div><h2>🌊 Underwater Challenge!</h2><div class="muted"><b style="color:#8de9ff">TIME LIMIT: 10 MINUTES.</b> The countdown starts the moment you enter. Transparent water will rise across your screen as time runs out. If it reaches the top, you lose. Clear all 15 levels and defeat King, Hydra before time expires.</div></div><button class="button gold" id="startHydraKingdom">🌊 Underwater Challenge!</button></div></section>
 <section class="panel quest-board">
 <div class="panelhead quest-head"><div><h2 id="questBoardTitle">📜 Quest Bar</h2><div class="muted" id="questBoardDesc">Random challenges with rewards. Complete one, then claim it to get a new quest.</div></div><div class="quest-bank"><span class="shard-count" id="shardCount">🔷 Maximus Shards: 0</span><span class="shard-count" id="zeroidCount">🟣 Zeroid Coins: 0</span><button class="button ghost" id="useShard" disabled>Use 1 Shard</button><button class="tip-button" data-tip="currency">ⓘ Currency tips</button></div></div>
 <div class="quest-grid" id="questCards"></div>
@@ -140,15 +150,34 @@ body.second-isle-mode{background:radial-gradient(ellipse at 18% 5%,#26365f 0,tra
 <section class="panel"><div class="panelhead"><div><h3>🧙 The Trader</h3><div class="muted">A regular trader with useful supplies and fair prices.</div></div><div style="display:flex;gap:6px;align-items:center"><span class="badge">🟢 ALWAYS HERE</span><button class="tip-button" data-tip="trader">ⓘ</button></div></div><div class="sidepad" id="shopArea"></div></section><section class="panel"><div class="panelhead"><div><h3>🧳 Wandering Trader</h3><div class="muted">Rare enchanted stock. Usually appears within a few levels.</div></div><div style="display:flex;gap:6px;align-items:center"><span class="badge" id="wanderingBadge">TRAVELLING</span><button class="tip-button" data-tip="trader">ⓘ</button></div></div><div class="sidepad" id="wanderingArea"></div></section><section class="panel" id="zeroidShopPanel" style="display:none"><div class="panelhead"><div><h3>🟣 Zeroid Shop</h3><div class="muted">Special supplies for boss battles. This shop appears at every boss level.</div></div><button class="tip-button" data-tip="zeroid">ⓘ Shop tips</button></div><div class="sidepad"><div class="zeroid-balance" id="zeroidShopBalance"></div><div class="items" id="zeroidShopArea"></div></div></section>
 </aside></div><div class="footer">Learn at your own pace. Every correct answer brings you one step closer to the final challenge. <br>Meaning Quest • a personal learning adventure · <a href="#" id="secretCodeLink" class="secret-code-link">code?</a></div></div>
 <button class="zoom-bubble" id="zoomBubble" type="button" aria-label="Decorative bubble" aria-hidden="true" title="A bubble"></button>
+<div id="hydraFloodOverlay" aria-live="off" aria-hidden="true"><div class="hydra-water-fill" id="hydraWaterFill"></div><div class="hydra-timer" id="hydraTimerText">🌊 10:00 REMAINING · 10-MINUTE LIMIT</div></div>
 <div class="modal" id="tutorialModal"><div class="modalcard" style="max-width:590px"><div class="big">📘</div><h2>Adventure Tutorial</h2><p>Everything you need to get started.</p><div class="tutorial-steps"><div class="tutorial-step"><span class="num">1</span><div><b>Answer and learn</b><small>Choose the correct Name of Allah or meaning. Correct answers earn XP and coins; wrong answers cost a heart.</small></div></div><div class="tutorial-step"><span class="num">2</span><div><b>Explore the levels</b><small>Boss battles happen every 5 levels. Bonus questions happen every 7 levels, except when the level is also a boss level.</small></div></div><div class="tutorial-step"><span class="num">3</span><div><b>Collect rewards</b><small>Use the regular Trader for normal supplies. The Zeroid Shop opens on boss levels and spends 🟣 Zeroid Coins.</small></div></div><div class="tutorial-step"><span class="num">4</span><div><b>Need help?</b><small>Open Tips & Secrets anytime. It also explains the Secret Chambers code and how to enter.</small></div></div></div><div class="tools" style="justify-content:center"><button class="button ghost" id="tutorialTips">Read Tips & Secrets</button><button class="button gold" id="tutorialClose">Got it — let’s play!</button></div></div></div><div class="modal" id="helpModal"><div class="modalcard" style="max-width:660px;text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:4px"><button class="button ghost" id="helpExit">✕ Exit</button></div><div class="big" style="text-align:center">💡</div><h2 id="helpTitle" style="text-align:center">Tips & Secrets</h2><p style="text-align:center">Helpful information for every part of the adventure.</p><div id="helpContent" class="tip-list"></div><div class="tools" style="justify-content:center"><button class="button gold" id="helpClose">Close tips</button></div></div></div><div class="modal" id="chamberRewardModal"><div class="modalcard" style="max-width:600px"><div class="big">🏅</div><h2>Secret Chambers Freed!</h2><p>You earned the title <b>Freed the Chambers</b>. Choose ONE reward below. This choice is permanent for this run.</p><div class="choice-grid"><button class="choice-card" id="chamberRewardQuill"><span class="choice-icon">🖋️</span><b>Quill of Exchange</b><small>Get 3 uses to swap questions for random new ones.</small><span class="button gold">Choose Quill</span></button><button class="choice-card" id="chamberRewardZeroid"><span class="choice-icon">🟣</span><b>5 Zeroid Coins</b><small>Spend them at the Zeroid Shop during boss levels.</small><span class="button gold">Choose Coins</span></button></div></div></div><div class="modal" id="goldenTrialsRewardModal"><div class="modalcard" style="max-width:560px"><div class="big">🏆</div><h2>Golden Trials Complete!</h2><p>You defeated all 25 Golden Trial bosses and earned the title <b>Golden Trials Champion</b>. Your main adventure has been restored.</p><div class="tools" style="justify-content:center"><button class="button gold" id="goldenTrialsRewardClose">Return to Adventure</button></div></div></div><div class="modal secret-code-modal" id="secretCodeModal"><div class="modalcard"><div class="big">🔐</div><h2>Hidden Region</h2><p>Enter a secret code to open a hidden region or claim a reward.</p><form id="secretCodeForm"><input class="code-field" id="secretCodeInput" type="text" autocomplete="off" placeholder="Enter code..." aria-label="Secret code"><div class="msg" id="secretCodeMessage">The code is case-insensitive.</div><button type="button" class="button gold" id="enterGoldenTrialsFromCode" style="display:none;width:100%;margin-top:10px">✨ Enter Golden Trials</button><button type="button" class="button gold" id="enterSecondIsleFromCode" style="display:none;width:100%;margin-top:10px">🌌 Enter Second Isle</button><div class="tools" style="justify-content:center"><button type="button" class="button ghost" id="secretCodeCancel">Cancel</button><button type="submit" class="button gold">Unlock Chambers</button></div></form></div></div>
 <div class="modal quill-modal" id="quillModal"><div class="modalcard"><div class="big" style="text-align:center">🖋️</div><h2>Quill of Exchange</h2><p>Trade your current question for a random new question about the Names of Allah. One use is spent when you confirm.</p><div class="msg" id="quillMessage">Ready to exchange this question?</div><div class="tools"><button type="button" class="button ghost" id="quillCancel">Cancel</button><button type="button" class="button gold" id="quillExchange">Exchange Question</button></div></div></div>
-<div class="totem-overlay" id="totemEffect" aria-live="polite" aria-hidden="true"><div class="totem-card"><div class="totem-rays">✦ ✧ ✦</div><span class="totem-icon" id="totemFxIcon">🪙</span><div class="totem-kicker">Resurrection</div><h2 id="totemFxTitle">TOTEM OF UNDYING!</h2><p id="totemFxText">You were revived with 1 heart. Keep going!</p><div class="totem-heart-pop" id="totemFxBadge">❤️ +1 HEART</div></div></div><div class="modal" id="potionChoiceModal"><div class="modalcard"><div class="big">🧪</div><h2>Powerful Potion</h2><p>Choose ONE effect for this run. This choice cannot be undone.</p><div class="potion-choices"><button class="button gold" id="potionHearts">💛 +5 permanent hearts</button><button class="button ghost" id="potionSkip">⏩ Complete 5 levels at once</button></div></div></div><div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="secondIsleModalButton" style="display:none">🌌 Enter Second Isle</button><button class="button gold" id="modalRestart">Play again</button></div></div>
+<div class="totem-overlay" id="totemEffect" aria-live="polite" aria-hidden="true"><div class="totem-card"><div class="totem-rays">✦ ✧ ✦</div><span class="totem-icon" id="totemFxIcon">🪙</span><div class="totem-kicker">Resurrection</div><h2 id="totemFxTitle">TOTEM OF UNDYING!</h2><p id="totemFxText">You were revived with 1 heart. Keep going!</p><div class="totem-heart-pop" id="totemFxBadge">❤️ +1 HEART</div></div></div><div class="modal" id="potionChoiceModal"><div class="modalcard"><div class="big">🧪</div><h2>Powerful Potion</h2><p>Choose ONE effect for this run. This choice cannot be undone.</p><div class="potion-choices"><button class="button gold" id="potionHearts">💛 +5 permanent hearts</button><button class="button ghost" id="potionSkip">⏩ Complete 5 levels at once</button></div></div></div><div class="modal" id="modal"><div class="modalcard"><div class="big" id="modalIcon">🏆</div><h2 id="modalTitle">Quest Complete!</h2><p id="modalText"></p><button class="button gold" id="secondIsleModalButton" style="display:none">🌌 Enter Second Isle</button><button class="button gold" id="hydraModalButton" style="display:none">Return to adventure</button><button class="button gold" id="modalRestart">Play again</button></div></div>
 <script>
 (function(){
 'use strict';
 const NAMES=[
 ['Ar-Rahman','Most Compassionate'],['Ar-Raheem','Especially Merciful'],['As-Salaam','Source of Peace'],['Al-Ahad','Absolutely One'],['Al-Awwal','The First'],['Al-Akhir','The Last'],['Al-Malik','Absolute King'],['Al-Wahid','The One'],['Al-Muhaymin','All-Watching Guardian'],['Al-Aziz','Almighty'],['Al-Jabbar','Compeller, Restorer'],['Al-Mutakabbir','Supremely Great'],['Al-Qadir','All-Powerful'],['Al-Haqq','Absolute Truth'],['Al-Quddus','Most Holy'],['Ar-Razzaq','Supreme Provider'],['Al-Wadud','Most Loving'],['Al-Wahhab','Supreme Bestower'],['Al-Ghafoor','All-Forgiving'],['Al-Aleem','All-Knowing'],['Al-Majeed','Most Glorious'],['Al-Hakeem','All-Wise'],['Al-Lateef','Most Gentle']];
 const REGIONS=[{name:'Emerald Wilds',icon:'🌲',sky:'linear-gradient(#293e66,#bd8b87)',titles:['Lantern Grove','Whispering Ferns','Foxfire Crossing','Mossy Bridge','Jade Waterfall','Mushroom Hollow','Moonlit Canopy','Old Oak Path','Firefly Lake','The Green Gate'],props:['🏮','🦊','🍄','🌿','🦋','🪵','🦉','🍃','🌳','💚']},{name:'Crystal Dunes',icon:'🏜️',sky:'linear-gradient(#392f65,#f1ae83)',titles:['Golden Drift','Mirage Basin','Sunstone Arch','Sapphire Oasis','Wind-Carved Hall','Sandglass Ridge','Amber Canyon','The Quiet Well','Dune of Echoes','Desert Gate'],props:['🏜️','🦂','🌵','🪬','🦎','💎','🐪','🌞','🪨','🔶']},{name:'Frostpeak Isles',icon:'❄️',sky:'linear-gradient(#234d78,#b7d9e6)',titles:['Snowbell Pass','Glacier Garden','Blue Ice Bridge','Aurora Shelf','Frosted Ruins','Crystal Fjord','Northwind Steps','Frozen Lantern','Silver Summit','Icebound Gate'],props:['❄️','🐺','⛸️','🧊','🦭','🌨️','🐧','💠','🏔️','🌌']},{name:'Sunken Kingdom',icon:'🌊',sky:'linear-gradient(#123f69,#55b9bd)',titles:['Coral Library','Pearl Market','Turtle’s Way','Blue Lantern Reef','Singing Shells','Kelp Cathedral','Whale Song Bay','Pearlstone Steps','The Deep Mirror','Tidal Gate'],props:['🐚','🐠','🐢','🪸','🦑','🐬','🫧','🦀','⚓','🦈']},{name:'Skyfire Citadel',icon:'☁️',sky:'linear-gradient(#44295f,#e88982)',titles:['Cloudstep Harbor','Comet Garden','Stormglass Tower','Sunbird Roost','Starfall Hall','Thunder Bridge','Moonstone Spire','Celestial Court','The Last Stair','Doomspire Arena'],props:['☁️','🦅','☄️','🌠','🪽','⚡','🔮','🌟','🛡️','☠️']}];
+const HYDRA_LEVELS=[
+{name:'Tideglass Gate',sky:'linear-gradient(#03364c,#40aabd)',props:['🐚','🪸','🫧']},
+{name:'Coral Guard Post',sky:'linear-gradient(#034258,#2f96ae)',props:['🛡️','🪸','🐠']},
+{name:'The Kelp Maze',sky:'linear-gradient(#052f42,#267b83)',props:['🌿','🫧','🐙']},
+{name:'Pearlwatch Hall',sky:'linear-gradient(#134567,#64bcd0)',props:['🦪','💎','🏛️']},
+{name:'Sunken Market',sky:'linear-gradient(#064050,#559d9c)',props:['🏺','🪙','🐟']},
+{name:'The Drowned Plaza',sky:'linear-gradient(#112e50,#397f9c)',props:['🏚️','⚓','🫧']},
+{name:'Whirlpool Steps',sky:'linear-gradient(#072b48,#2388a1)',props:['🌀','🪨','🐡']},
+{name:'Trident Crossing',sky:'linear-gradient(#0b3655,#427fb1)',props:['🔱','🛡️','🌊']},
+{name:'The Blue Cathedral',sky:'linear-gradient(#123756,#477fa0)',props:['🏛️','🕯️','🐬']},
+{name:'Abyssal Prison',sky:'linear-gradient(#07192f,#315c80)',props:['⛓️','🚪','🦑']},
+{name:'Ghostfleet Harbor',sky:'linear-gradient(#10283d,#527e93)',props:['🚢','🌫️','⚓']},
+{name:'The Pressure Vault',sky:'linear-gradient(#07263b,#2d647c)',props:['🔐','💠','🪨']},
+{name:'Hydra’s Outer Court',sky:'linear-gradient(#142b51,#427fc3)',props:['🏰','🗡️','🐉']},
+{name:'Throne of Tides',sky:'linear-gradient(#0b2142,#4668a8)',props:['👑','🔱','🌊']},
+{name:'Hydra Kingdom Throne Room',sky:'linear-gradient(#07152f,#275d89)',props:['👑','🐲','💧']}
+];
+const HYDRA_BOSSES={2:'Coral Guard Captain',4:'Pearlwatch Crusher',6:'The Drowned Sentinel',8:'Trident Knight',10:'Abyssal Jailor',12:'Pressure Vault Warden',14:'Hydra’s Royal Champion',15:'King, Hydra'};
 const SECOND_ISLE_REGIONS=[
 {name:'Shattered Coast',icon:'🌊',sky:'linear-gradient(#071b36,#477d91)',titles:['Glitchwater Shore','Broken Lighthouse','Static Tidepool','Fracture Pier','Echoing Dock','Riftfoam Beach','Glasswreck Bay','Pixel Reef','Null-Tide Cavern','The First Crack'],props:['🫧','🗼','⚡','⚓','🐚','🌀','🚢','🪸','🕳️','💥'],bosses:['The Static Leviathan','Wreckage Warden']},
 {name:'Glitched Verdant',icon:'🌿',sky:'linear-gradient(#092c25,#668b45)',titles:['Seedless Orchard','Corrupted Thicket','Moss.exe','The Bent Willow','Broken Beehive','Green Noise Grove','Twisted Rootway','The Vanishing Pond','Glitchbloom Meadow','The Thorn Gate'],props:['🌱','🌳','🍄','🪵','🐝','🍀','🌿','🪷','🌼','🥀'],bosses:['Thorn.exe','Verdant Error']},
@@ -181,6 +210,10 @@ const WANDERING_ITEMS=[
 {id:'powerfulpotion',icon:'🧪',name:'Powerful Potion',cost:150,desc:'Choose +5 permanent hearts or complete 5 levels at once.'}
 ];
 let state;
+let hydraTimerInterval=null;
+let hydraStartedAt=0;
+let hydraRetryPending=false;
+const HYDRA_DURATION_MS=10*60*1000;
 const CHAMBER_SCENES=[{name:'The Cinder Vault',sky:'linear-gradient(#130f2e,#71394e)',props:['🕯️','🪨','⚔️'],boss:'Cinder Warden'},{name:'Hall of Echoes',sky:'linear-gradient(#111b39,#485078)',props:['🔔','🪞','👁️'],boss:'Echo Knight'},{name:'The Shattered Gate',sky:'linear-gradient(#28132f,#8b4155)',props:['⛓️','🗝️','🛡️'],boss:'Gatekeeper Zero'},{name:'Null Garden',sky:'linear-gradient(#061f29,#236a67)',props:['🌑','🌿','🔮'],boss:'Null Keeper'},{name:'KillSwitch Core',sky:'linear-gradient(#180817,#bd243c)',props:['💀','⚡','🗡️'],boss:'KillSwitch'}];
 const GOLDEN_TRIAL_SCENES=[
 {name:'The Sunlit Threshold',sky:'linear-gradient(#6e4d10,#f8d95a)',props:['🌞','🏛️','✨'],boss:'Gilded Sentinel'},
@@ -351,7 +384,7 @@ function grantBonusReward(){
 }
 function readSecondIsleUnlock(){try{return window.localStorage.getItem('meaningQuestSecondIsleUnlocked')==='1';}catch(e){return false;}}
 function saveSecondIsleUnlock(){try{window.localStorage.setItem('meaningQuestSecondIsleUnlocked','1');}catch(e){}}
-function fresh(){document.body.classList.remove('chambers-mode','golden-trials-mode','second-isle-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialProgress:null,goldenTrialsCompleted:false,goldenTrialsCodeUnlocked:false,coinCodeUsed:false,secondIsleUnlocked:readSecondIsleUnlock(),secondIsleCodeUnlocked:false,secondIsleMode:false,secondIsleLevel:1,secondIsleSavedState:null,secondIsleProgress:null,secondIsleCompleted:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
+function fresh(){stopHydraTimer();document.body.classList.remove('chambers-mode','golden-trials-mode','second-isle-mode','hydra-kingdom-mode');state={level:1,hearts:3,maxHearts:5,goldenHearts:0,goldenRounds:0,xp:0,coins:0,streak:0,cleared:0,bossHp:0,bossMax:0,shield:0,streakGuard:0,lucky:0,elixir:0,totem:false,revived:false,crystalUsed:false,memory:false,key:false,shopOpen:true,wanderingTraderHere:false,knockbackUses:0,powerPotionPending:false,inventory:[],trophies:[],titles:[],hinted:false,locked:false,q:null,maximusShards:0,zeroidCoins:0,correctAnswers:0,bossesDefeated:0,quests:[],questSerial:0,chamberMode:false,chamberFloor:0,chamberSavedState:null,chambersCompleted:false,chamberRewardChosen:false,quillUses:0,quillEditing:false,hintUses:1,levelsSinceWanderer:0,regularOutOfStock:[],wanderingOutOfStock:[],zeroidOutOfStock:[],amuletUsedThisLevel:false,goldenTrialsMode:false,goldenTrialFloor:0,goldenTrialSavedState:null,goldenTrialProgress:null,goldenTrialsCompleted:false,goldenTrialsCodeUnlocked:false,coinCodeUsed:false,secondIsleUnlocked:readSecondIsleUnlock(),secondIsleCodeUnlocked:false,secondIsleMode:false,secondIsleLevel:1,secondIsleSavedState:null,secondIsleProgress:null,secondIsleCompleted:false,hydraKingdomMode:false,hydraLevel:1,hydraSavedState:null,hydraCompleted:false};state.quests=[generateQuest(),generateQuest(),generateQuest()];}
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function rollShopStock(){
@@ -471,8 +504,12 @@ function openHelp(topic='all'){
 }
 function openTutorial(){$('tutorialModal').classList.add('show');}
 function playGame(){$('titleScreen').style.display='none';$('gameWrap').style.display='block';startBubbleTimer();}
-function isBossLevel(){return state.chamberMode||state.goldenTrialsMode||state.secondIsleMode||state.level%5===0;}
-function isBonusLevel(){return !state.chamberMode&&!state.goldenTrialsMode&&state.level%7===0&&!isBossLevel();}
+function isBossLevel(){
+ if(state.chamberMode||state.goldenTrialsMode||state.secondIsleMode)return true;
+ if(state.hydraKingdomMode)return state.hydraLevel===15||state.hydraLevel%2===0;
+ return state.level%5===0;
+}
+function isBonusLevel(){return !state.chamberMode&&!state.goldenTrialsMode&&!state.secondIsleMode&&!state.hydraKingdomMode&&state.level%7===0&&!isBossLevel();}
 function regionFor(level){return Math.min(4,Math.floor((level-1)/10));}
 function renderMap(){
  if(state.chamberMode){
@@ -493,6 +530,16 @@ function renderMap(){
   let ns='';
   for(let i=1;i<=50;i++){let cl='node'+(i<state.secondIsleLevel?' cleared':'')+(i===state.secondIsleLevel?' current':'')+(i>state.secondIsleLevel?' locked':'')+(i%5===0?' boss':'');ns+='<div class="'+cl+'" title="Second Isle Level '+i+'">'+(i<state.secondIsleLevel?'✓':i===50?'🖤':i%5===0?'👾':i)+'</div>';}
   $('nodes').innerHTML=ns;$('progressText').textContent='Second Isle '+state.secondIsleLevel+' / 50';$('regionText').textContent=SECOND_ISLE_REGIONS[r].icon+' '+SECOND_ISLE_REGIONS[r].name;return;
+ }
+ if(state.hydraKingdomMode){
+  $('regions').innerHTML='<div class="region active">🌊 Hydra Kingdom · Timed</div>';
+  let ns='';
+  for(let i=1;i<=15;i++){
+   const boss=i===15||i%2===0;
+   const cl='node'+(i<state.hydraLevel?' cleared':'')+(i===state.hydraLevel?' current':'')+(i>state.hydraLevel?' locked':'')+(boss?' boss':'');
+   ns+='<div class="'+cl+'" title="Hydra Kingdom · Level '+i+'">'+(i<state.hydraLevel?'✓':i===15?'🐲':boss?'👾':i)+'</div>';
+  }
+  $('nodes').innerHTML=ns;$('progressText').textContent='Hydra Kingdom '+state.hydraLevel+' / 15';$('regionText').textContent='🌊 Hydra Kingdom';return;
  }
  let r=regionFor(state.level);
  $('regions').innerHTML=REGIONS.map((x,i)=>'<div class="region '+(i===r?'active':'')+'">'+x.icon+' '+x.name+'</div>').join('');
@@ -612,36 +659,19 @@ function choosePotionHearts(){
 }
 function skipFiveLevels(){
  if(!state.powerPotionPending)return;
- state.powerPotionPending=false;
- $('potionChoiceModal').classList.remove('show');
- const second=state.secondIsleMode;
- const start=second?state.secondIsleLevel:state.level;
- const end=Math.min(50,start+4);
+ state.powerPotionPending=false;$('potionChoiceModal').classList.remove('show');
+ const second=state.secondIsleMode,hydra=state.hydraKingdomMode,cap=hydra?15:50;
+ const start=hydra?state.hydraLevel:(second?state.secondIsleLevel:state.level),end=Math.min(cap,start+4);
  state.inventory.push('🧪 Powerful Potion · skipped 5 levels');
  for(let lv=start;lv<=end;lv++){
-  state.level=lv;
-  if(second)state.secondIsleLevel=lv;
-  else state.cleared=Math.max(state.cleared,lv);
+  state.level=lv;if(second)state.secondIsleLevel=lv;else if(hydra)state.hydraLevel=lv;else state.cleared=Math.max(state.cleared,lv);
   updateQuests('level');
-  if(lv%5===0){
-   state.trophies.push(second?'🌌 Second Isle boss · '+lv:'🏆 Boss trophy · Lv '+lv);
-   state.bossesDefeated++;
-   updateQuests('boss');
-  }
+  const isBoss=hydra?(lv===15||lv%2===0):lv%5===0;
+  if(isBoss){state.trophies.push(hydra?'🌊 Hydra Kingdom boss · '+lv:second?'🌌 Second Isle boss · '+lv:'🏆 Boss trophy · Lv '+lv);state.bossesDefeated++;updateQuests('boss');}
  }
- if(end>=50){
-  state.level=51;
-  state.q=null;
-  renderAll();
-  if(second)finishSecondIsle();else endGame(true);
-  return;
- }
- state.level=end+1;
- if(second)state.secondIsleLevel=state.level;
- state.q=null;
- startLevel();
- say('Powerful Potion skipped levels '+start+'–'+end+'!','good');
- renderAll();
+ if(end>=cap){state.level=cap+1;state.q=null;renderAll();if(hydra)finishHydraKingdom();else if(second)finishSecondIsle();else endGame(true);return;}
+ state.level=end+1;if(second)state.secondIsleLevel=state.level;if(hydra)state.hydraLevel=state.level;
+ state.q=null;startLevel();say('Powerful Potion skipped levels '+start+'–'+end+'!','good');renderAll();
 }
 function useKnockbackSword(){
  if(state.knockbackUses<=0){say('No Knockback Sword uses remain.','bad');return;}
@@ -657,11 +687,12 @@ function useKnockbackSword(){
 function startLevel(){
  state.locked=false;state.hinted=false;state.shopOpen=true;
  rollShopStock();
- if(state.chamberMode||state.goldenTrialsMode||state.secondIsleMode){state.wanderingTraderHere=false;}
+ if(state.chamberMode||state.goldenTrialsMode||state.secondIsleMode||state.hydraKingdomMode){state.wanderingTraderHere=false;}
  else{const guaranteed=state.levelsSinceWanderer>=2;state.wanderingTraderHere=guaranteed||Math.random()<0.6;state.levelsSinceWanderer=state.wanderingTraderHere?0:state.levelsSinceWanderer+1;}
  if(state.chamberMode){state.bossMax=state.chamberFloor===5?10:3;state.bossHp=state.bossMax;}
  else if(state.goldenTrialsMode){state.bossMax=state.goldenTrialFloor===25?10:3;state.bossHp=state.bossMax;}
  else if(state.secondIsleMode){state.bossMax=state.secondIsleLevel===50?24:(state.secondIsleLevel%5===0?5:0);state.bossHp=state.bossMax;}
+ else if(state.hydraKingdomMode){state.bossMax=state.hydraLevel===15?10:(state.hydraLevel%2===0?5:0);state.bossHp=state.bossMax;}
  else if(state.level%5===0){state.bossMax=state.level===50?10:3;state.bossHp=state.bossMax;}
  else{state.bossMax=0;state.bossHp=0;}
  renderScene();
@@ -670,7 +701,7 @@ function startLevel(){
  makeQuestion(null,bonus);
  renderAll();renderShop();
  say(bonus?'🎁 BONUS QUESTION! Answer correctly to win a special reward.':isBossLevel()?(state.chamberMode?'Secret chamber boss! Defeat the guardian to advance.':'Boss battle! Answer correctly to damage the boss.'):'Choose your answer to collect XP and coins.');
- $('hintline').textContent=state.chamberMode?'Every chamber has a boss. KillSwitch has 10 hearts.':state.goldenTrialsMode?'Every Golden Trial stage has a boss. The final boss has 10 HP.':state.secondIsleMode?'Second Isle bosses have 5 hearts. The final Corrupted Entity Of Doom has 20 hearts and 4 black glitch hearts.':bonus?'Bonus reward available for a correct answer!':'Tip: every 5th level is a boss fight.';
+ $('hintline').textContent=state.chamberMode?'Every chamber has a boss. KillSwitch has 10 hearts.':state.goldenTrialsMode?'Every Golden Trial stage has a boss. The final boss has 10 HP.':state.secondIsleMode?'Second Isle bosses have 5 hearts. The final Corrupted Entity Of Doom has 20 hearts and 4 black glitch hearts.':state.hydraKingdomMode?'Timed challenge: finish all 15 levels before the transparent water reaches the top!':bonus?'Bonus reward available for a correct answer!':'Tip: every 5th level is a boss fight.';
 }
 function renderScene(){
  if(state.chamberMode){let s=CHAMBER_SCENES[state.chamberFloor-1];$('sceneKicker').textContent='Secret Chambers · Boss '+state.chamberFloor+' / 5';$('sceneTitle').textContent=s.name;$('sceneBadge').className='badge boss';$('sceneBadge').textContent=state.chamberFloor===5?'☠️ KILLSWITCH':'👹 CHAMBER BOSS';$('art').style.background=s.sky;$('prop1').textContent=s.props[0];$('prop2').textContent=s.props[1];$('prop3').textContent=s.props[2];$('sun').textContent='🌑';$('cloud').textContent='⚡';$('artlabel').textContent='SECRET CHAMBERS · '+s.name.toUpperCase();return;}
@@ -682,6 +713,18 @@ function renderScene(){
   $('sceneBadge').className='badge'+(state.secondIsleLevel%5===0?' boss':'');
   $('sceneBadge').textContent=state.secondIsleLevel===50?'🖤 FINAL BOSS':state.secondIsleLevel%5===0?'👾 GLITCH BOSS':isBonusLevel()?'🎁 BONUS QUESTION':'🌌 SECOND ISLE';
   $('art').style.background=reg.sky;$('prop1').textContent=reg.props[step];$('prop2').textContent=reg.props[(step+3)%10];$('prop3').textContent=reg.props[(step+6)%10];$('sun').textContent=['🌘','🌿','🕳️','🩸','🖤'][ix];$('cloud').textContent=['⚡','🍃','♾️','🔥','👾'][ix];$('artlabel').textContent=reg.name+' · '+title;
+  return;
+ }
+ if(state.hydraKingdomMode){
+  const stage=HYDRA_LEVELS[state.hydraLevel-1];
+  const boss=state.hydraLevel===15||state.hydraLevel%2===0;
+  $('sceneKicker').textContent='Hydra Kingdom · Level '+state.hydraLevel+' / 15'+(boss?' · Boss battle':'');
+  $('sceneTitle').textContent=stage.name;
+  $('sceneBadge').className='badge'+(boss?' boss':'');
+  $('sceneBadge').textContent=state.hydraLevel===15?'🐉 FINAL BOSS':boss?'👾 HYDRA GUARD':'🌊 UNDERWATER';
+  $('art').style.background=stage.sky;
+  $('prop1').textContent=stage.props[0];$('prop2').textContent=stage.props[1];$('prop3').textContent=stage.props[2];
+  $('sun').textContent='🫧';$('cloud').textContent='🐟';$('artlabel').textContent='HYDRA KINGDOM · '+stage.name.toUpperCase();
   return;
  }
  let ix=regionFor(state.level),reg=REGIONS[ix],step=(state.level-1)%10,title=reg.titles[step];
@@ -726,10 +769,11 @@ function renderBoss(){
  let name=state.chamberMode?(state.chamberFloor===5?'☠️ KILLSWITCH':'👹 '+CHAMBER_SCENES[state.chamberFloor-1].boss)
   :state.goldenTrialsMode?(state.goldenTrialFloor===25?'☀️ THE GOLDEN COLOSSUS':'✨ '+GOLDEN_TRIAL_SCENES[state.goldenTrialFloor-1].boss)
   :state.secondIsleMode?(state.secondIsleLevel===50?'🖤 CORRUPTED ENTITY OF DOOM':'👾 '+SECOND_ISLE_REGIONS[regionFor(state.secondIsleLevel)].bosses[(state.secondIsleLevel-1)%10>=5?1:0])
+  :state.hydraKingdomMode?(state.hydraLevel===15?'🐉 King, Hydra':'🌊 '+HYDRA_BOSSES[state.hydraLevel])
   :(state.level===50?'☠️ THE DESTRUCTED':'👹 Level '+state.level+' Boss');
  box.innerHTML='<div class="bossbox"><div class="bosstop"><span>'+name+'</span><span>'+state.bossHp+' / '+state.bossMax+' HP</span></div><div class="bosshearts'+(finalGlitchBoss?' glitch-hearts':'')+'">'+hearts+'</div></div>';
 }
-function awardBoss(){state.trophies.push(state.goldenTrialsMode?'🏆 Golden Trials boss · '+state.goldenTrialFloor:state.chamberMode?'🏆 Secret Chambers boss · '+state.chamberFloor:state.secondIsleMode?'🌌 Second Isle boss · '+state.secondIsleLevel:'🏆 Boss trophy · Lv '+state.level);state.bossesDefeated++;updateQuests('boss');let missing=SPECIAL.filter(s=>!state[s.id]);if(missing.length){let got=missing[Math.floor(Math.random()*missing.length)];state[got.id]=true;say('Boss defeated! You earned '+got.name+' — '+got.desc,'good');}else{say('Boss defeated! Another trophy added to your collection.','good');}}
+function awardBoss(){state.trophies.push(state.goldenTrialsMode?'🏆 Golden Trials boss · '+state.goldenTrialFloor:state.chamberMode?'🏆 Secret Chambers boss · '+state.chamberFloor:state.secondIsleMode?'🌌 Second Isle boss · '+state.secondIsleLevel:state.hydraKingdomMode?'🌊 Hydra Kingdom boss · '+state.hydraLevel:'🏆 Boss trophy · Lv '+state.level);state.bossesDefeated++;updateQuests('boss');let missing=SPECIAL.filter(s=>!state[s.id]);if(missing.length){let got=missing[Math.floor(Math.random()*missing.length)];state[got.id]=true;say('Boss defeated! You earned '+got.name+' — '+got.desc,'good');}else{say('Boss defeated! Another trophy added to your collection.','good');}}
 function activateTotemRevive(){
  if(!state.totem||state.revived)return false;
  state.revived=true;
@@ -745,6 +789,7 @@ function advanceLevel(fromBoss){
  if(state.chamberMode){if(state.chamberFloor>=5){finishSecretChambers();return;}state.chamberFloor++;state.level=state.chamberFloor;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}
  if(state.goldenTrialsMode){updateQuests('level');if(state.goldenTrialFloor>=25){finishGoldenTrials();return;}state.goldenTrialFloor++;state.level=state.goldenTrialFloor;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}
  if(state.secondIsleMode){updateQuests('level');if(state.secondIsleLevel>=50){finishSecondIsle();return;}state.secondIsleLevel++;state.level=state.secondIsleLevel;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}
+ if(state.hydraKingdomMode){updateQuests('level');if(state.hydraLevel>=15){finishHydraKingdom();return;}state.hydraLevel++;state.level=state.hydraLevel;state.q=null;startLevel();if(fromBoss&&state.trophies.length)renderRelics();return;}
  state.cleared=Math.max(state.cleared,state.level);updateQuests('level');state.level++;state.q=null;if(state.level>50){endGame(true);return;}state.shopOpen=true;startLevel();if(fromBoss&&state.trophies.length)renderRelics();
 }
 function renderZeroidShop(){
@@ -791,7 +836,7 @@ function renderZeroidShop(){
   }
   renderAll();
  }
- function renderAll(){renderHud();renderRelics();renderBoss();renderShop();renderQuests();renderWanderingTrader();renderZeroidShop();renderGoldenTrialsEntry();renderSecondIsleEntry();}
+ function renderAll(){renderHud();renderRelics();renderBoss();renderShop();renderQuests();renderWanderingTrader();renderZeroidShop();renderGoldenTrialsEntry();renderSecondIsleEntry();renderHydraChallengeEntry();}
 function showHint(){if(!state.q)return;if(state.locked){say('Finish the current answer before using a hint.','bad');return;}if(state.hinted){say('You have already used a hint on this question.','bad');return;}if(state.hintUses<=0){say('No hints left. Buy a Hint Scroll from the Trader for 30 coins.','bad');return;}let correct=state.q.correct;let b=[...document.querySelectorAll('.answer')];let wrong=b.filter(x=>decodeURIComponent(x.dataset.answer)!==correct);shuffle(wrong).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.25';});$('hintline').textContent='Hint: '+(state.q.askMeaning?'The correct meaning begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”':'The correct Name begins with “'+correct.slice(0,Math.min(4,correct.length))+'…”');state.hintUses--;state.hinted=true;renderRelics();say('Hint used! '+state.hintUses+' hint(s) remaining.','good');}
 function buy(id){let it=ITEMS.find(x=>x.id===id);if(!it)return;if(state.regularOutOfStock.includes(id)){say('That item is out of stock until the next level.','bad');return;}let cost=state.goldenTrialsMode?10:(state.key?Math.ceil(it.cost/2):it.cost);if(state.coins<cost)return;let msg=it.buy();if(msg==='Your hearts are already full.'||msg==='Your Totem has already been purchased or used.') {say(msg,'bad');return;}state.coins-=cost;if(it.id!=='hintscroll'&&!state.inventory.includes(it.icon+' '+it.name))state.inventory.push(it.icon+' '+it.name);say(msg,'good');renderAll();}
 function endGame(win){
@@ -839,7 +884,7 @@ function restoreAdventureSnapshot(saved){
 function renderGoldenTrialsEntry(){
  const panel=$('goldenTrialsUnlockPanel');
  if(!panel)return;
- const available=!state.goldenTrialsMode&&!state.secondIsleMode&&!state.chamberMode&&!state.goldenTrialsCompleted;
+ const available=!state.goldenTrialsMode&&!state.secondIsleMode&&!state.chamberMode&&!state.hydraKingdomMode&&!state.goldenTrialsCompleted;
  panel.style.display=available?'block':'none';
  const button=$('enterGoldenTrials');
  if(button)button.textContent=state.goldenTrialProgress?'↻ Resume Golden Trials · Stage '+state.goldenTrialProgress.floor:'✨ Enter Golden Trials';
@@ -912,7 +957,7 @@ function finishGoldenTrials(){
 function renderSecondIsleEntry(){
  const panel=$('secondIsleUnlockPanel');
  if(!panel)return;
- const available=!!state.secondIsleUnlocked&&!state.secondIsleMode&&!state.goldenTrialsMode&&!state.chamberMode;
+ const available=!!state.secondIsleUnlocked&&!state.secondIsleMode&&!state.goldenTrialsMode&&!state.chamberMode&&!state.hydraKingdomMode;
  panel.style.display=available?'block':'none';
  const button=$('enterSecondIsle');
  if(button){
@@ -994,6 +1039,77 @@ function finishSecondIsle(){
  $('modal').classList.add('show');
  say('🏆 SECOND ISLE COMPLETE! You defeated the Corrupted Entity Of Doom.','good');
 }
+function renderHydraChallengeEntry(){
+ const panel=$('hydraChallengePanel');
+ if(!panel)return;
+ panel.style.display=(!state.hydraKingdomMode&&!state.secondIsleMode&&!state.goldenTrialsMode&&!state.chamberMode)?'block':'none';
+}
+function enterHydraKingdom(){
+ if(state.locked){say('Finish your current question before starting the Underwater Challenge.','bad');return;}
+ if(state.hydraKingdomMode){say('You are already in Hydra Kingdom — watch the timer and rising water!','bad');return;}
+ if(state.chamberMode||state.goldenTrialsMode||state.secondIsleMode){say('Exit your current hidden challenge before starting Hydra Kingdom.','bad');return;}
+ state.hydraSavedState=captureAdventureSnapshot();
+ state.hydraKingdomMode=true;
+ document.body.classList.add('hydra-kingdom-mode');
+ $('modal').classList.remove('show');
+ $('modalRestart').style.display='inline-flex';$('modalRestart').textContent='Play again';
+ $('secondIsleModalButton').style.display='none';$('hydraModalButton').style.display='none';
+ hydraRetryPending=false;
+ state.hydraLevel=1;state.level=1;state.q=null;state.locked=false;state.hinted=false;state.wanderingTraderHere=false;
+ state.quests=[];state.questSerial=0;state.quests=[generateQuest(),generateQuest(),generateQuest()];
+ startLevel();renderAll();startHydraTimer();
+ say('⏱️ TIMED CHALLENGE! You have 10 minutes. The transparent water is rising — defeat King, Hydra before it reaches the top!','good');
+}
+function startHydraTimer(){
+ stopHydraTimer();hydraStartedAt=Date.now();
+ const overlay=$('hydraFloodOverlay');
+ overlay.style.display='block';overlay.setAttribute('aria-hidden','false');
+ $('hydraWaterFill').style.height='0%';$('hydraTimerText').textContent='🌊 10:00 REMAINING · 10-MINUTE LIMIT';$('hydraTimerText').classList.remove('warning');
+ updateHydraFlood();hydraTimerInterval=window.setInterval(updateHydraFlood,120);
+}
+function updateHydraFlood(){
+ if(!state||!state.hydraKingdomMode)return;
+ const elapsed=Math.max(0,Date.now()-hydraStartedAt),remaining=Math.max(0,HYDRA_DURATION_MS-elapsed),percent=Math.min(1,elapsed/HYDRA_DURATION_MS);
+ $('hydraWaterFill').style.height=(percent*100)+'%';
+ const seconds=Math.ceil(remaining/1000),mm=String(Math.floor(seconds/60)).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0');
+ $('hydraTimerText').textContent='🌊 '+mm+':'+ss+' REMAINING · WATER RISING';
+ $('hydraTimerText').classList.toggle('warning',remaining<=60000);
+ if(remaining<=0){$('hydraWaterFill').style.height='100%';loseHydraKingdom();}
+}
+function stopHydraTimer(){
+ if(hydraTimerInterval!==null){window.clearInterval(hydraTimerInterval);hydraTimerInterval=null;}
+ const overlay=document.getElementById('hydraFloodOverlay');if(overlay){overlay.style.display='none';overlay.setAttribute('aria-hidden','true');}
+ const water=document.getElementById('hydraWaterFill');if(water)water.style.height='0%';
+ const timer=document.getElementById('hydraTimerText');if(timer)timer.classList.remove('warning');
+}
+function restoreFromHydra(){
+ const saved=state.hydraSavedState;
+ state.hydraKingdomMode=false;state.hydraLevel=1;state.hydraSavedState=null;
+ document.body.classList.remove('hydra-kingdom-mode');
+ restoreAdventureSnapshot(saved);state.locked=false;
+ renderScene();renderQuestion();renderAll();renderShop();
+}
+function loseHydraKingdom(){
+ if(!state.hydraKingdomMode)return;
+ stopHydraTimer();restoreFromHydra();hydraRetryPending=true;
+ $('modalIcon').textContent='🌊';$('modalTitle').textContent='HYDRA KINGDOM FLOODED!';
+ $('modalText').textContent='The water reached the top before your 10 minutes were up. You lost the Underwater Challenge. Try again when you are ready.';
+ $('secondIsleModalButton').style.display='none';$('hydraModalButton').textContent='↻ Try Underwater Challenge Again';
+ $('hydraModalButton').style.display='inline-flex';$('modalRestart').style.display='none';$('modal').classList.add('show');
+ say('🌊 The flood reached the top. Hydra Kingdom challenge failed.','bad');
+}
+function finishHydraKingdom(){
+ if(!state.hydraKingdomMode)return;
+ stopHydraTimer();restoreFromHydra();state.hydraCompleted=true;
+ if(!state.titles.includes('Sunken To The Depths'))state.titles.push('Sunken To The Depths');
+ state.zeroidCoins+=5;state.goldenHearts=2;state.goldenRounds=20;state.inventory.push('💛 Enchanted Totem of Undying');
+ renderAll();
+ $('modalIcon').textContent='🐉';$('modalTitle').textContent='HYDRA KINGDOM CONQUERED!';
+ $('modalText').textContent='You defeated King, Hydra in time! Rewards: the title Sunken To The Depths, 5 Zeroid Coins, and 1 Enchanted Totem of Undying (2 golden hearts for 20 rounds).';
+ $('secondIsleModalButton').style.display='none';$('hydraModalButton').textContent='Return to adventure';
+ $('hydraModalButton').style.display='inline-flex';$('modalRestart').style.display='none';$('modal').classList.add('show');
+ say('🏆 HYDRA KINGDOM COMPLETE! Title and rewards earned.','good');
+}
 function openSecretCode(){
  if(state.chamberMode){say('You are already inside the Secret Chambers.','bad');return;}
  $('secretCodeMessage').textContent=state.chambersCompleted?'The chambers have already been freed this run.':'The code is case-insensitive.';
@@ -1073,13 +1189,14 @@ function exchangeQuillQuestion(){if(state.quillUses<=0){$('quillMessage').textCo
 
 function exitSecretCodeModal(){$('secretCodeModal').classList.remove('show');}
 
-function restart(){fresh();$('modal').classList.remove('show');startLevel();}
+function restart(){stopHydraTimer();fresh();$('modal').classList.remove('show');$('modalRestart').style.display='inline-flex';$('hydraModalButton').style.display='none';startLevel();}
 $('zoomBubble').addEventListener('click',popRewardBubble);
 $('answers').addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b&&!b.disabled)answer(decodeURIComponent(b.dataset.answer),b);});
 $('shopArea').addEventListener('click',e=>{let b=e.target.closest('[data-buy]');if(b)buy(b.dataset.buy);});$('zeroidShopArea').addEventListener('click',e=>{let b=e.target.closest('[data-zeroid-buy]');if(b)buyZeroid(b.dataset.zeroidBuy);});$('wanderingArea').addEventListener('click',e=>{let b=e.target.closest('[data-wanderbuy]');if(b)buyWandering(b.dataset.wanderbuy);let sword=e.target.closest('[data-use-sword]');if(sword)useKnockbackSword();});$('potionHearts').addEventListener('click',choosePotionHearts);$('potionSkip').addEventListener('click',skipFiveLevels);
 $('continue').addEventListener('click',()=>{if(!state.locked)return;const wasBonus=!!(state.q&&state.q.bonus);state.locked=false;state.q=null;$('continue').style.display='none';makeQuestion();say(wasBonus?'Bonus question missed — no bonus reward this time. The regular level question comes next.':'Next question — you’ve got this!','good');});$('hint').addEventListener('click',showHint);$('questCards').addEventListener('click',e=>{let b=e.target.closest('[data-claimquest]');if(b)claimQuest(Number(b.dataset.claimquest));});$('useShard').addEventListener('click',redeemMaximusShard);
 $('enterGoldenTrials').addEventListener('click',enterGoldenTrials);$('enterGoldenTrialsFromCode').addEventListener('click',()=>{if(state.locked){$('secretCodeMessage').textContent='Finish your current question first, then enter Golden Trials.';return;}$('secretCodeModal').classList.remove('show');enterGoldenTrials();});$('exitGoldenTrials').addEventListener('click',exitGoldenTrials);
-$('enterSecondIsle').addEventListener('click',enterSecondIsle);$('exitSecondIsle').addEventListener('click',exitSecondIsle);$('enterSecondIsleFromCode').addEventListener('click',()=>{if(state.locked){$('secretCodeMessage').textContent='Finish your current question first, then enter Second Isle.';return;}$('secretCodeModal').classList.remove('show');enterSecondIsle();});$('secondIsleModalButton').addEventListener('click',()=>{$('modal').classList.remove('show');state.locked=false;enterSecondIsle();});$('goldenTrialsRewardClose').addEventListener('click',()=>$('goldenTrialsRewardModal').classList.remove('show'));$('playButton').addEventListener('click',playGame);$('tutorialButton').addEventListener('click',openTutorial);$('titleTipsButton').addEventListener('click',()=>openHelp('all'));$('tipsOpen').addEventListener('click',()=>openHelp('all'));document.querySelectorAll('[data-tip]').forEach(b=>b.addEventListener('click',()=>openHelp(b.dataset.tip)));$('tutorialTips').addEventListener('click',()=>{ $('tutorialModal').classList.remove('show');openHelp('all');});$('tutorialClose').addEventListener('click',()=>{$('tutorialModal').classList.remove('show');playGame();});$('helpClose').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('helpExit').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('chamberRewardQuill').addEventListener('click',()=>chooseChamberReward('quill'));$('chamberRewardZeroid').addEventListener('click',()=>chooseChamberReward('zeroid'));$('secretCodeLink').addEventListener('click',e=>{e.preventDefault();openSecretCode();});$('secretCodeInput').addEventListener('input',()=>{
+$('enterSecondIsle').addEventListener('click',enterSecondIsle);$('exitSecondIsle').addEventListener('click',exitSecondIsle);
+$('startHydraKingdom').addEventListener('click',enterHydraKingdom);$('hydraModalButton').addEventListener('click',()=>{$('modal').classList.remove('show');$('modalRestart').style.display='inline-flex';$('hydraModalButton').style.display='none';if(hydraRetryPending){hydraRetryPending=false;enterHydraKingdom();}});$('enterSecondIsleFromCode').addEventListener('click',()=>{if(state.locked){$('secretCodeMessage').textContent='Finish your current question first, then enter Second Isle.';return;}$('secretCodeModal').classList.remove('show');enterSecondIsle();});$('secondIsleModalButton').addEventListener('click',()=>{$('modal').classList.remove('show');state.locked=false;enterSecondIsle();});$('goldenTrialsRewardClose').addEventListener('click',()=>$('goldenTrialsRewardModal').classList.remove('show'));$('playButton').addEventListener('click',playGame);$('tutorialButton').addEventListener('click',openTutorial);$('titleTipsButton').addEventListener('click',()=>openHelp('all'));$('tipsOpen').addEventListener('click',()=>openHelp('all'));document.querySelectorAll('[data-tip]').forEach(b=>b.addEventListener('click',()=>openHelp(b.dataset.tip)));$('tutorialTips').addEventListener('click',()=>{ $('tutorialModal').classList.remove('show');openHelp('all');});$('tutorialClose').addEventListener('click',()=>{$('tutorialModal').classList.remove('show');playGame();});$('helpClose').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('helpExit').addEventListener('click',()=>$('helpModal').classList.remove('show'));$('chamberRewardQuill').addEventListener('click',()=>chooseChamberReward('quill'));$('chamberRewardZeroid').addEventListener('click',()=>chooseChamberReward('zeroid'));$('secretCodeLink').addEventListener('click',e=>{e.preventDefault();openSecretCode();});$('secretCodeInput').addEventListener('input',()=>{
  const code=String($('secretCodeInput').value||'').trim().toLowerCase();
  if(code==='1265'){unlockSecondIsle();state.secondIsleCodeUnlocked=true;$('enterSecondIsleFromCode').style.display='block';$('secretCodeMessage').textContent='🌌 SECOND ISLE UNLOCKED! Click below to enter.';}
  else if(code==='12223'){state.goldenTrialsCodeUnlocked=true;$('enterGoldenTrialsFromCode').style.display='block';$('secretCodeMessage').textContent='✨ Golden Trials unlocked! Click the button below to enter.';renderGoldenTrialsEntry();}
